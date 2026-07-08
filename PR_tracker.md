@@ -157,3 +157,76 @@ resto del sistema siguiendo la arquitectura definida.
 Durante esta fase se estableció la base técnica del proyecto.
 A partir de este punto el desarrollo continuará utilizando un Pull Request por
 Sprint para mantener una trazabilidad más detallada del proyecto.
+
+# PR #2 – Navbar y Footer
+
+## Información general
+
+**Fase**
+
+3 – Módulo Público
+
+**Sprint**
+
+3.1 – Navbar y Footer
+
+**Branch**
+
+feature/navbar-footer
+
+**Estado**
+
+✅ Completado y fusionado en `dev`
+
+---
+
+## Objetivo
+
+Construir la base visual del módulo público mediante una Navbar y un Footer reutilizables, alineados con la Arquitectura Técnica y el Design System.
+
+---
+
+## Trabajo realizado
+
+- Creación de la plantilla base pública (`base.html`).
+- Desarrollo de la Navbar pública reutilizable.
+- Desarrollo del Footer público reutilizable.
+- Integración de ambos componentes mediante Jinja2.
+- Creación de la primera vista `home.html`.
+- Actualización de la ruta pública para renderizar la vista Home.
+- Integración del logo oficial de la empresa.
+- Implementación de la paleta oficial y estilos CSS.
+- Validación responsive en escritorio y dispositivos móviles.
+- Revisión visual y ajustes conforme al Design System.
+
+---
+
+## Archivos principales
+
+- PR_tracker.md
+- app/__init__.py
+- app/blueprints/public/routes.py
+- app/static/css/styles.css
+- app/static/img/logo-los-altos.svg
+- app/templates/base.html
+- app/templates/partials/navbar.html
+- app/templates/partials/footer.html
+- app/templates/public/home.html
+
+---
+
+## Pull Request
+
+**PR:** #2
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/feature/navbar-footer?expand=1
+
+---
+
+## Observaciones
+
+Durante el desarrollo se detectó que la especificación visual de la Navbar pública necesitaba mayor detalle para evitar decisiones de diseño durante la implementación. La sección correspondiente del Design System fue actualizada desde el Project Manager antes de continuar con el desarrollo, manteniendo la coherencia entre la documentación y el código.
+
+El Sprint 3.1 finalizó con la Navbar y el Footer completamente funcionales, reutilizables, responsive y alineados con la arquitectura, el Roadmap y el Design System.
