@@ -1067,3 +1067,78 @@ footer .text-muted {
         min-width: 0;
     }
 }
+/* ==========================================================
+   LOGIN INTERNO
+   Tarjeta centrada de máximo 420px según el Design System.
+   ========================================================== */
+
+.login-page {
+    min-height: calc(100vh - 220px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    background-color: var(--la-bg);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+    padding: 2rem;
+}
+
+.login-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin-bottom: 0.25rem;
+}
+
+.login-subtitle {
+    color: var(--la-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-card .form-control {
+    border-radius: 0.625rem;
+    min-height: 44px; /* objetivo táctil mínimo (accesibilidad) */
+}
+
+.login-card .form-control:focus {
+    border-color: var(--la-brand);
+    box-shadow: 0 0 0 0.2rem var(--la-focus-ring);
+}
+
+.login-submit {
+    min-height: 44px;
+    border-radius: 0.75rem;
+    font-weight: 600;
+}
+
+.login-note {
+    font-size: 0.85rem;
+}
+
+/* Badge del rol en el panel administrativo */
+.admin-role-badge {
+    background-color: var(--la-brand-soft);
+    color: var(--la-brand-active);
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+@media (max-width: 575.98px) {
+    .login-page {
+        padding: 2rem 1rem;
+        align-items: flex-start;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+    }
+}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión | Los Altos{% endblock %}
+
+{% block content %}
+<!--
+===============================================================================
+LOGIN INTERNO
+
+Pantalla de acceso para usuarios internos (administradores y vendedores).
+Según el Design System: tarjeta centrada con ancho máximo de 420px.
+
+El formulario viene de LoginForm (Flask-WTF), que agrega el token CSRF.
+===============================================================================
+-->
+<div class="login-page">
+    <div class="login-card">
+
+        <h1 class="login-title">Acceso interno</h1>
+        <p class="login-subtitle">
+            Panel administrativo y de ventas de Los Altos.
+        </p>
+
+        <form method="post" novalidate>
+            {{ form.csrf_token }}
+
+            <div class="mb-3">
+                {{ form.username.label(class="form-label fw-semibold") }}
+                {{ form.username(
+                    class="form-control" + (" is-invalid" if form.username.errors else ""),
+                    placeholder="Tu usuario",
+                    autofocus=true,
+                    autocomplete="username") }}
+                {% for error in form.username.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4">
+                {{ form.password.label(class="form-label fw-semibold") }}
+                {{ form.password(
+                    class="form-control" + (" is-invalid" if form.password.errors else ""),
+                    placeholder="Tu contraseña",
+                    autocomplete="current-password") }}
+                {% for error in form.password.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 login-submit">
+                Iniciar sesión
+            </button>
+        </form>
+
+        <p class="login-note text-muted mt-4 mb-0">
+            Acceso exclusivo para el personal de Los Altos.
+            Si olvidaste tus datos, contacta al administrador.
+        </p>
+
+    </div>
+</div>
+{% endblock %}

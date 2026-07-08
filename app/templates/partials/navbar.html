@@ -79,6 +79,23 @@ Proyecto: Sistema Integral de Gestión Comercial
             <a class="btn navbar-cta mt-3 mt-md-0 ms-md-4" href="#">
                 Solicitar cotización
             </a>
+
+            {# ==========================================================
+               Estado de sesión interna (Flask-Login)
+               Solo visible cuando un usuario interno inició sesión.
+            ========================================================== #}
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin() %}
+                    <a class="btn btn-outline-secondary btn-sm mt-3 mt-md-0 ms-md-3"
+                       href="{{ url_for('admin.dashboard') }}">
+                        Panel
+                    </a>
+                {% endif %}
+                <a class="btn btn-outline-secondary btn-sm mt-3 mt-md-0 ms-md-2"
+                   href="{{ url_for('auth.logout') }}">
+                    Cerrar sesión
+                </a>
+            {% endif %}
         </div>
 
     </div>
