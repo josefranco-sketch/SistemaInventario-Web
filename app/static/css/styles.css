@@ -911,3 +911,159 @@ footer .text-muted {
     height: 200px;
   }
 }
+
+/* ==========================================================
+   DETALLE DEL PRODUCTO
+   ========================================================== */
+
+.product-detail-page {
+    background: #f7f8fa;
+}
+
+.product-detail-image-card,
+.product-detail-content {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.04);
+}
+
+.product-detail-image-card {
+    padding: 1rem;
+}
+
+.product-detail-image {
+    width: 100%;
+    max-height: 640px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+}
+
+.product-detail-content {
+    padding: 1.5rem;
+}
+
+.product-detail-title {
+    font-size: 2rem;
+    line-height: 1.15;
+    font-weight: 700;
+    color: #111827;
+}
+
+.product-detail-code {
+    color: #6b7280;
+    font-size: 0.98rem;
+}
+
+.product-detail-price-box {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.9rem;
+    padding: 1rem 1.1rem;
+}
+
+.product-detail-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.product-detail-price {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #f57da5;
+}
+
+.product-detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.product-detail-info-item,
+.product-detail-brand,
+.product-detail-description {
+    background: #ffffff;
+}
+
+.product-detail-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.product-detail-description p {
+    color: #374151;
+    line-height: 1.7;
+}
+
+.product-detail-actions .btn {
+    min-width: 180px;
+    border-radius: 0.75rem;
+    padding: 0.8rem 1.2rem;
+    font-weight: 600;
+}
+
+.product-detail-note {
+    color: #6b7280;
+    font-size: 0.92rem;
+}
+
+/* Badges del detalle */
+.product-detail-page .badge {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.product-detail-page .category-badge {
+    background: #fde7f0;
+    color: #111827;
+}
+
+.product-detail-page .availability-disponible {
+    background: #eaf7ef;
+    color: #198754;
+}
+
+.product-detail-page .availability-baja-disponibilidad {
+    background: #fff7e6;
+    color: #b45309;
+}
+
+.product-detail-page .availability-agotado {
+    background: #fdecec;
+    color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .product-detail-content {
+        padding: 1.25rem;
+    }
+
+    .product-detail-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-detail-title {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .product-detail-image-card,
+    .product-detail-content {
+        border-radius: 0.85rem;
+    }
+
+    .product-detail-actions .btn {
+        width: 100%;
+        min-width: 0;
+    }
+}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle del Producto | Los Altos{% endblock %}
+
+{% block content %}
+<section class="product-detail-page py-5">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('public.home') }}" class="text-decoration-none">Inicio</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('public.catalog') }}" class="text-decoration-none">Catálogo</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Detalle del producto</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4 align-items-start">
+            <div class="col-12 col-lg-6">
+                <div class="product-detail-image-card">
+                    <img
+                        src="{{ product.image_url }}"
+                        alt="{{ product.name }}"
+                        class="img-fluid product-detail-image"
+                    >
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="product-detail-content">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge rounded-pill category-badge category-{{ product.category_name|lower }}">
+                            {{ product.category_name }}
+                        </span>
+                        <span class="badge rounded-pill availability-badge availability-{{ product.availability_level }}">
+                            {{ product.availability_label }}
+                        </span>
+                    </div>
+
+                    <h1 class="product-detail-title mb-2">{{ product.name }}</h1>
+
+                    <p class="product-detail-code mb-3">
+                        Código: <strong>{{ product.code }}</strong>
+                    </p>
+
+                    <div class="product-detail-price-box mb-4">
+                        <span class="product-detail-label">Precio</span>
+                        <div class="product-detail-price">{{ product.price }}</div>
+                    </div>
+
+                    <div class="product-detail-info-grid mb-4">
+                        <div class="product-detail-info-item">
+                            <span class="product-detail-label">Presentación comercial</span>
+                            <div class="product-detail-value">{{ product.commercial_presentation }}</div>
+                        </div>
+
+                        <div class="product-detail-info-item">
+                            <span class="product-detail-label">Unidad comercial</span>
+                            <div class="product-detail-value">{{ product.commercial_unit }}</div>
+                        </div>
+
+                        <div class="product-detail-info-item">
+                            <span class="product-detail-label">Mínimo de venta</span>
+                            <div class="product-detail-value">{{ product.minimum_sale }}</div>
+                        </div>
+
+                        <div class="product-detail-info-item">
+                            <span class="product-detail-label">Subcategoría</span>
+                            <div class="product-detail-value">{{ product.subcategory_name }}</div>
+                        </div>
+                    </div>
+
+                    {% if product.brand %}
+                    <div class="product-detail-brand mb-4">
+                        <span class="product-detail-label">Marca</span>
+                        <div class="product-detail-value">{{ product.brand }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="product-detail-description mb-4">
+                        <span class="product-detail-label">Descripción</span>
+                        <p class="mb-0">{{ product.description }}</p>
+                    </div>
+
+                    <div class="product-detail-actions d-flex flex-wrap gap-2">
+                        <a href="{{ return_url or url_for('public.catalog') }}"
+                            class="btn btn-outline-secondary">
+                         Volver al catálogo
+                        </a>
+                        </a>
+                        <a href="#" class="btn btn-primary">
+                            Agregar a cotización
+                        </a>
+                    </div>
+
+                    <div class="product-detail-note mt-4">
+                        <small>
+                            La disponibilidad pública se muestra sin cantidades exactas de inventario.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

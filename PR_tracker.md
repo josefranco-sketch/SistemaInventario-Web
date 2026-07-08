@@ -230,3 +230,44 @@ https://github.com/josefranco-sketch/SistemaInventario-Web/compare/feature/navba
 Durante el desarrollo se detectó que la especificación visual de la Navbar pública necesitaba mayor detalle para evitar decisiones de diseño durante la implementación. La sección correspondiente del Design System fue actualizada desde el Project Manager antes de continuar con el desarrollo, manteniendo la coherencia entre la documentación y el código.
 
 El Sprint 3.1 finalizó con la Navbar y el Footer completamente funcionales, reutilizables, responsive y alineados con la arquitectura, el Roadmap y el Design System.
+
+## Sprint 3.3 – Catálogo
+
+- **Branch:** `feature/catalog`
+- **Pull Request:** `#4 – Feature: Add public catalog`
+- **Estado:** Completado
+
+### Resumen
+Se implementó el catálogo público con productos reales de prueba, filtros por categoría, subcategoría y disponibilidad, búsqueda por texto y tarjetas alineadas al Design System. También se validó responsive, navegación pública y estructura modular.
+
+### Archivos modificados
+- `app/blueprints/public/routes.py`
+- `app/static/css/styles.css`
+- `app/templates/partials/navbar.html`
+- `app/templates/public/catalog.html`
+- `app/static/img/products/labial-mate-mes3107.png`
+- `app/static/img/products/juguete.png`
+- `app/static/img/products/tulipan-rojo.png`
+
+### Pruebas realizadas
+- Búsqueda por código, nombre y descripción.
+- Filtro por categoría.
+- Filtro por subcategoría dependiente de la categoría.
+- Filtro por disponibilidad.
+- Validación visual responsive en navegador.
+
+### Decisiones o impacto documental
+- ADR: sin cambios.
+- Roadmap: Sprint 3.3 completado.
+- Design System: sin cambios estructurales.
+- Arquitectura Técnica: sin cambios estructurales.
+
+**PR:** #4
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/feature/catalog?expand=1
+
+
+### Pendientes
+- Ninguno bloqueante para este sprint.

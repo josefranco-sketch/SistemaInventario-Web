@@ -1,32 +1,11 @@
 # Rutas del módulo público
-from flask import render_template, request, url_for
+from flask import abort, render_template, request, url_for
 
 from app.blueprints.public import public_bp
 
-# Página de Inicio
 
-# Cuando el usuario entra a "/", Flask renderiza el Home.
-@public_bp.route("/")
-def home():
-    return render_template("public/home.html")
-
-# Página del Catálogo
-# Muestra el catálogo público.
-#
-# Por el momento enviamos una lista vacía porque el módulo
-# de Productos todavía no existe.
-#
-# En el Sprint de Productos esta lista será reemplazada
-# por los datos obtenidos desde la base de datos.
-# ==========================================================
-@public_bp.route("/catalog")
-def catalog():
-    # ==========================================================
-    # Datos reales de prueba del catálogo.
-    # Más adelante esto será reemplazado por ProductService.
-    # ==========================================================
-
-    products = [
+def _get_demo_products():
+    return [
         {
             "name": "Labial Matte Baolishi",
             "code": "MES3107",
@@ -83,11 +62,8 @@ def catalog():
         },
     ]
 
-    # ==========================================================
-    # Construcción dinámica de categorías y subcategorías
-    # a partir de los productos disponibles.
-    # ==========================================================
 
+def _build_categories_and_subcategories(products):
     categories = sorted({product["category_name"] for product in products})
 
     subcategories = {}
@@ -97,6 +73,30 @@ def catalog():
             for product in products
             if product["category_name"] == category_name
         })
+
+    return categories, subcategories
+
+
+# Página de Inicio
+# Cuando el usuario entra a "/", Flask renderiza el Home.
+@public_bp.route("/")
+def home():
+    return render_template("public/home.html")
+
+
+# Página del Catálogo
+# Muestra el catálogo público.
+#
+# Por el momento enviamos datos de prueba porque el módulo
+# de Productos todavía no existe.
+#
+# En el Sprint de Productos esta fuente será reemplazada
+# por los datos obtenidos desde la base de datos.
+# ==========================================================
+@public_bp.route("/catalog")
+def catalog():
+    products = _get_demo_products()
+    categories, subcategories = _build_categories_and_subcategories(products)
 
     # ==========================================================
     # Filtros enviados por la URL
@@ -147,5 +147,28 @@ def catalog():
         categories=categories,
         subcategories=visible_subcategories,
         selected_category=selected_category,
-        selected_subcategory=selected_subcategory
+        selected_subcategory=selected_subcategory,
+        selected_availability=availability,
+        query=request.args.get("q", "").strip()
+    )
+
+
+# Página de Detalle del Producto
+# Muestra la ficha pública de un producto específico.
+@public_bp.route("/catalog/<string:product_code>")
+def product_detail(product_code):
+    products = _get_demo_products()
+
+    product = next(
+        (item for item in products if item["code"] == product_code),
+        None
+    )
+
+    if product is None:
+        abort(404)
+
+    return render_template(
+        "public/product_detail.html",
+        product=product,
+        return_url=request.args.get("next")
     )
