@@ -302,3 +302,118 @@ Archivos modificados:
 
 link:
 https://github.com/josefranco-sketch/SistemaInventario-Web/pull/new/feature/product-detail
+# PR #7 – Admin Login (Sprint 4.1)
+
+## Información general
+
+**Fase**
+
+4 – Panel Administrativo
+
+**Sprint**
+
+4.1 – Login Administrativo
+
+**Branch**
+
+feature/admin-login
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Crear el acceso interno al sistema: autenticación real con Flask-Login,
+modelo de usuario con roles (administrador/vendedor), protección de rutas
+internas y pantalla de login alineada al Design System.
+
+---
+
+## Trabajo realizado
+
+- Creación del modelo `User` con SQLAlchemy (tabla `users`): username único,
+  nombre, rol (admin/vendedor), estado activo y contraseña como hash
+  (Werkzeug, nunca texto plano).
+- Nace la capa `app/models/` prevista en la Arquitectura Técnica.
+- Nace la capa `app/services/` con `auth_service.py`: la validación de
+  credenciales (usuario existe, está activo, contraseña coincide) vive en
+  servicios, no en rutas ni templates.
+- Implementación del blueprint `auth`: rutas de login (GET/POST) y logout.
+- Formulario `LoginForm` con Flask-WTF (validaciones y token CSRF).
+- `user_loader` real en `create_app()` (antes retornaba `None`).
+- Configuración de `login_view`: rutas protegidas redirigen al login con
+  mensaje claro y regresan a la ruta original tras autenticarse (`?next=`),
+  aceptando solo rutas internas.
+- Decorador `admin_required` (control de rol) en el blueprint `auth`.
+- Pantalla base del panel administrativo (`/admin/`) protegida con
+  `@login_required` + `@admin_required`; será reemplazada por el dashboard
+  completo en el Sprint 4.2.
+- Vista de login: tarjeta centrada de máximo 420px, paleta oficial vía
+  variables CSS, campos con objetivo táctil de 44px, responsive.
+- Partial de mensajes flash reutilizable incluido en `base.html`.
+- Navbar: enlaces de Panel (solo admin) y Cerrar sesión cuando hay sesión.
+- Script de consola `seed_admin.py` para crear el usuario administrador de
+  prueba (pide datos con `input()`, guarda hash, evita duplicados).
+- Creación de tablas con `db.create_all()` al iniciar la aplicación.
+- `.gitignore` actualizado: `instance/` y `*.db` no se suben al repositorio.
+
+---
+
+## Archivos principales
+
+- app/models/__init__.py, app/models/user.py (nuevos)
+- app/services/__init__.py, app/services/auth_service.py (nuevos)
+- app/blueprints/auth/routes.py, forms.py, decorators.py (nuevos)
+- app/blueprints/admin/routes.py (nuevo)
+- app/templates/auth/login.html, app/templates/admin/dashboard.html (nuevos)
+- app/templates/partials/flash_messages.html (nuevo)
+- seed_admin.py (nuevo)
+- app/__init__.py, app/blueprints/auth/__init__.py,
+  app/blueprints/admin/__init__.py (modificados)
+- app/templates/base.html, app/templates/partials/navbar.html (modificados)
+- app/static/css/styles.css, .gitignore (modificados)
+
+---
+
+## Pruebas realizadas
+
+- Ruta protegida sin sesión redirige al login (302 → /login?next=/admin/).
+- Login con credenciales incorrectas muestra mensaje genérico sin revelar
+  cuál dato falló.
+- Login correcto crea sesión y regresa a la ruta original (?next=).
+- Usuario ya autenticado que visita /login es redirigido a su panel.
+- Logout cierra la sesión; la ruta protegida vuelve a exigir login.
+- Usuario inactivo no puede iniciar sesión.
+- Vendedor autenticado no puede entrar a /admin/ (control de rol).
+- POST sin token CSRF no procesa el login ni crea sesión.
+- Campos vacíos muestran errores de validación por campo.
+- La contraseña se guarda como hash scrypt (verificado en la base de datos).
+- Módulo público intacto: /, /catalog, /catalog/<código> y /cotizacion
+  responden 200.
+
+---
+
+## Pull Request
+
+**PR:** #7
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/admin-login?expand=1
+
+---
+
+## Observaciones
+
+Temas de la Sección 02 (rúbrica UFM) utilizados en este sprint: variables y
+tipos de datos (textos, booleanos), entrada y salida por consola (`input()` /
+`print()` en `seed_admin.py`), condicionales (`if`/`else` en el servicio de
+autenticación y redirección por rol), funciones propias con parámetros y
+`return` (`authenticate_user`, `ask_value`, `create_admin_user`,
+`_safe_next_url`), modularidad (modelos, servicios, formularios y rutas en
+archivos separados conectados con `import`, más bloque
+`if __name__ == "__main__":` en `seed_admin.py`) y librería estándar
+(`functools.wraps` en el decorador de roles, `os` en configuración).
