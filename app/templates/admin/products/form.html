@@ -77,14 +77,21 @@ de ProductForm (Flask-WTF), que incluye el token CSRF.
             {{ render_field(form.brand, "Marca (opcional)") }}
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-6">
             {{ render_field(form.price, "0.00") }}
           </div>
-          <div class="col-md-4">
+          <div class="col-md-6">
             {{ render_select(form.commercial_unit) }}
           </div>
-          <div class="col-md-4">
-            {{ render_select(form.availability) }}
+
+          <div class="col-12">
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>La disponibilidad pública
+              (Disponible / Baja disponibilidad / Agotado) se calcula
+              automáticamente desde el inventario según el stock y el umbral
+              de la subcategoría. Un producto nuevo nace <strong>agotado</strong>
+              hasta que registres su primera entrada en Inventario.
+            </small>
           </div>
 
           <div class="col-12">

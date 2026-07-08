@@ -401,3 +401,31 @@ a.shortcut-card:hover {
     border: 1px solid var(--la-border);
     flex-shrink: 0;
 }
+
+/* --------------------------------------------------------------
+   8. Módulo de Inventario
+   -------------------------------------------------------------- */
+
+/* Stock exacto (visible solo en pantallas internas) */
+.inventory-stock {
+    font-weight: 700;
+    color: var(--la-carbon);
+}
+
+.inventory-stock--low {
+    color: #B45309; /* mismo tono de advertencia de los badges */
+}
+
+.inventory-stock--out {
+    color: var(--la-danger);
+}
+
+/* Badges de tipo de movimiento */
+.movement-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.movement-badge--entrada { background-color: var(--la-success-soft); color: var(--la-success); }
+.movement-badge--salida  { background-color: var(--la-warning-soft); color: #B45309; }

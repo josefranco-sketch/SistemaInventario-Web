@@ -21,9 +21,9 @@ este template solo los presenta.
   {% if summary.demo_data %}
     <div class="alert alert-info alert-dismissible fade show" role="alert">
       <i class="bi bi-info-circle me-1"></i>
-      Los indicadores de inventario, cotizaciones y ventas muestran
+      Los indicadores de cotizaciones y ventas muestran
       <strong>datos de demostración</strong>; se conectarán a la base de datos
-      en el Sprint 4.4 y las Fases 5 y 6. Los conteos de productos y usuarios
+      en las Fases 5 y 6. Los conteos de productos, bajo stock y usuarios
       ya son reales.
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
     </div>
@@ -70,7 +70,6 @@ este template solo los presenta.
     <h2 class="admin-section-title">Accesos rápidos</h2>
 
     {% set shortcuts = [
-      {"title": "Inventario", "icon": "bi-clipboard-data", "text": "Existencias, movimientos y bajo stock.", "soon": "Sprint 4.4"},
       {"title": "Usuarios", "icon": "bi-people", "text": "Administradores y vendedores del sistema.", "soon": "Sprint 4.5"},
       {"title": "Cotizaciones", "icon": "bi-file-earmark-text", "text": "Solicitudes de cotización de clientes.", "soon": "Fase 6"},
       {"title": "Ventas", "icon": "bi-cart", "text": "Pedidos, pagos y comprobantes internos.", "soon": "Fase 5"},
@@ -78,13 +77,23 @@ este template solo los presenta.
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
 
-      {# Acceso real: módulo de Productos (Sprint 4.3) #}
+      {# Accesos reales: módulos ya construidos #}
       <div class="col">
         <a class="shortcut-card" href="{{ url_for('admin.products_list') }}">
           <span class="shortcut-card__icon"><i class="bi bi-box-seam"></i></span>
           <div>
             <p class="shortcut-card__title">Productos</p>
             <p class="shortcut-card__text">Crear y administrar el catálogo de productos.</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('admin.inventory_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-clipboard-data"></i></span>
+          <div>
+            <p class="shortcut-card__title">Inventario</p>
+            <p class="shortcut-card__text">Existencias, movimientos y bajo stock.</p>
           </div>
         </a>
       </div>
