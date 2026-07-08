@@ -271,3 +271,34 @@ https://github.com/josefranco-sketch/SistemaInventario-Web/compare/feature/catal
 
 ### Pendientes
 - Ninguno bloqueante para este sprint.
+
+Sprint 3.4 – Detalle del Producto
+
+Branch:
+feature/product-detail
+
+Pull Request:
+#5 – Feature: Add public product detail page
+
+Estado:
+✅ Completado
+
+Resumen:
+- Se implementó la página pública de detalle del producto.
+- Se creó la ruta pública para visualizar un producto por su código.
+- Se desarrolló la plantilla product_detail.html siguiendo el Design System.
+- Se agregaron estilos específicos para la ficha del producto.
+- Se conectó el catálogo con la vista de detalle mediante navegación directa.
+- Se implementó el retorno al catálogo conservando los filtros aplicados.
+- Se reutilizaron los productos reales de prueba del Sprint 3.3.
+- Se respetó la regla de no mostrar cantidades exactas de inventario.
+- Se mantuvo la arquitectura Flask + Jinja2 + Bootstrap + CSS propio.
+
+Archivos modificados:
+- app/blueprints/public/routes.py
+- app/templates/public/catalog.html
+- app/templates/public/product_detail.html
+- app/static/css/styles.css
+
+link:
+https://github.com/josefranco-sketch/SistemaInventario-Web/pull/new/feature/product-detail

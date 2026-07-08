@@ -89,8 +89,13 @@
                             class="btn btn-outline-secondary">
                          Volver al catálogo
                         </a>
-                        </a>
-                        <a href="#" class="btn btn-primary">
+
+                       <a href="{{ url_for(
+                            'quotes.quote_home',
+                            product_code=product.code,
+                            product_name=product.name,
+                            product_price=product.price
+                        ) }}" class="btn btn-primary">
                             Agregar a cotización
                         </a>
                     </div>
