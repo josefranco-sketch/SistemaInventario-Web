@@ -1,38 +1,109 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
-{% block title %}Panel Administrativo | Los Altos{% endblock %}
+{% block title %}Dashboard | Los Altos{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
-{% block content %}
+{% block admin_content %}
 <!--
 ===============================================================================
-PANEL ADMINISTRATIVO (pantalla base)
+DASHBOARD ADMINISTRATIVO
 
-Vista mínima protegida con login que confirma que la sesión y el rol
-funcionan. El dashboard completo (layout con sidebar, KPIs y accesos
-rápidos) se construye en el Sprint 4.2 y reemplazará esta pantalla.
+Pantalla principal del panel interno:
+- Fila de indicadores (KPIs) con los números principales del sistema.
+- Accesos rápidos hacia los módulos internos.
+
+Los valores vienen calculados desde app/services/dashboard_service.py;
+este template solo los presenta.
 ===============================================================================
 -->
-<div class="container py-5">
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
+<div class="container-xl">
 
-            <h1 class="h3 fw-bold mb-2">Panel Administrativo</h1>
-
-            <p class="text-muted mb-1">
-                Sesión iniciada como
-                <strong>{{ current_user.full_name }}</strong>
-                <span class="badge admin-role-badge ms-1">{{ current_user.role }}</span>
-            </p>
-
-            <p class="text-muted mb-4">
-                El dashboard con indicadores y accesos rápidos se construirá en el Sprint 4.2.
-            </p>
-
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary">
-                Cerrar sesión
-            </a>
-
-        </div>
+  {% if summary.demo_data %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <i class="bi bi-info-circle me-1"></i>
+      Los indicadores de productos, inventario, cotizaciones y ventas muestran
+      <strong>datos de demostración</strong>; se conectarán a la base de datos
+      en los Sprints 4.3, 4.4 y las Fases 5 y 6.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
     </div>
+  {% endif %}
+
+  {# ==========================================================
+     Indicadores principales (KPIs)
+     La lista "tiles" define cada tarjeta: etiqueta, icono,
+     tono visual y el valor que entrega el servicio.
+  ========================================================== #}
+  {% set tiles = [
+    {"label": "Total de productos", "icon": "bi-box-seam", "tone": "brand", "value": summary.total_products},
+    {"label": "Productos activos", "icon": "bi-check-circle", "tone": "success", "value": summary.active_products},
+    {"label": "Bajo stock", "icon": "bi-exclamation-triangle", "tone": "warning", "value": summary.low_stock},
+    {"label": "Cotizaciones pendientes", "icon": "bi-file-earmark-text", "tone": "info", "value": summary.pending_quotes},
+    {"label": "Pedidos recientes", "icon": "bi-cart", "tone": "neutral", "value": summary.recent_orders},
+    {"label": "Usuarios internos", "icon": "bi-people", "tone": "neutral", "value": summary.total_users},
+  ] %}
+
+  <section aria-label="Indicadores principales">
+    <div class="row row-cols-2 row-cols-md-3 row-cols-xxl-6 g-3">
+      {% for tile in tiles %}
+        <div class="col">
+          <div class="kpi-card">
+            <span class="kpi-card__icon kpi-card__icon--{{ tile.tone }}">
+              <i class="bi {{ tile.icon }}"></i>
+            </span>
+            <div class="kpi-card__body">
+              <p class="kpi-card__label">{{ tile.label }}</p>
+              <p class="kpi-card__value">{{ tile.value }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ==========================================================
+     Accesos rápidos hacia los módulos internos
+     Los módulos aún no construidos se muestran deshabilitados
+     con el sprint/fase en que estarán disponibles.
+  ========================================================== #}
+  <section class="mt-4" aria-label="Accesos rápidos">
+    <h2 class="admin-section-title">Accesos rápidos</h2>
+
+    {% set shortcuts = [
+      {"title": "Productos", "icon": "bi-box-seam", "text": "Crear y administrar el catálogo de productos.", "soon": "Sprint 4.3"},
+      {"title": "Inventario", "icon": "bi-clipboard-data", "text": "Existencias, movimientos y bajo stock.", "soon": "Sprint 4.4"},
+      {"title": "Usuarios", "icon": "bi-people", "text": "Administradores y vendedores del sistema.", "soon": "Sprint 4.5"},
+      {"title": "Cotizaciones", "icon": "bi-file-earmark-text", "text": "Solicitudes de cotización de clientes.", "soon": "Fase 6"},
+      {"title": "Ventas", "icon": "bi-cart", "text": "Pedidos, pagos y comprobantes internos.", "soon": "Fase 5"},
+    ] %}
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
+      {% for item in shortcuts %}
+        <div class="col">
+          <div class="shortcut-card shortcut-card--disabled" title="Disponible en {{ item.soon }}">
+            <span class="shortcut-card__icon"><i class="bi {{ item.icon }}"></i></span>
+            <div>
+              <p class="shortcut-card__title">
+                {{ item.title }}
+                <span class="badge shortcut-card__soon">{{ item.soon }}</span>
+              </p>
+              <p class="shortcut-card__text">{{ item.text }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      {# Acceso real disponible desde ya: el sitio público #}
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('public.home') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-globe2"></i></span>
+          <div>
+            <p class="shortcut-card__title">Sitio público</p>
+            <p class="shortcut-card__text">Ver el catálogo tal como lo ve el cliente.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
 </div>
 {% endblock %}
