@@ -1,0 +1,181 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Productos | Los Altos{% endblock %}
+{% block page_title %}Productos{% endblock %}
+
+{% block admin_content %}
+<!--
+===============================================================================
+LISTADO ADMINISTRATIVO DE PRODUCTOS
+
+- Filtros por texto, categoría y estado (viajan por GET en la URL).
+- Tabla interna con estado y disponibilidad como badges (texto + color).
+- Acciones por producto: editar y cambiar estado (activar / inactivar /
+  archivar). Los cambios de estado viajan por POST con token CSRF.
+- Los productos NUNCA se eliminan físicamente (regla ADR).
+===============================================================================
+-->
+<div class="container-xl">
+
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <p class="text-muted mb-0">
+      {{ products|length }} producto(s)
+    </p>
+    <a class="btn btn-primary ms-auto" href="{{ url_for('admin.product_new') }}">
+      <i class="bi bi-plus-lg me-1"></i>Nuevo producto
+    </a>
+  </div>
+
+  {# ==========================================================
+     Filtros del listado
+  ========================================================== #}
+  <form method="get" action="{{ url_for('admin.products_list') }}" class="admin-filter-card mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-4">
+        <label class="form-label fw-semibold" for="filter-q">Buscar</label>
+        <input type="text" id="filter-q" name="q" class="form-control"
+               placeholder="Código, nombre o descripción" value="{{ search }}">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold" for="filter-category">Categoría</label>
+        <select id="filter-category" name="category" class="form-select">
+          <option value="">Todas</option>
+          {% for category in categories %}
+            <option value="{{ category.id }}"
+                    {% if selected_category == category.id %}selected{% endif %}>
+              {{ category.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold" for="filter-status">Estado</label>
+        <select id="filter-status" name="status" class="form-select">
+          <option value="">Todos</option>
+          {% for value, label in [("activo", "Activo"), ("inactivo", "Inactivo"), ("archivado", "Archivado")] %}
+            <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-secondary flex-fill">Filtrar</button>
+        <a class="btn btn-link text-decoration-none px-1" href="{{ url_for('admin.products_list') }}">Limpiar</a>
+      </div>
+    </div>
+  </form>
+
+  {# ==========================================================
+     Tabla de productos
+  ========================================================== #}
+  {% if products %}
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle admin-table mb-0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th class="text-end">Precio</th>
+              <th>Presentación</th>
+              <th>Estado</th>
+              <th>Disponibilidad</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+              <tr>
+                <td class="fw-semibold">{{ product.code }}</td>
+
+                <td>
+                  <div class="fw-semibold">{{ product.name }}</div>
+                  {% if product.brand %}
+                    <small class="text-muted">{{ product.brand }}</small>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <span class="badge category-chip category-chip--{{ product.category.slug }}">
+                    {{ product.category.name }}
+                  </span>
+                  <div><small class="text-muted">{{ product.subcategory.name }}</small></div>
+                </td>
+
+                <td class="text-end">Q {{ "%.2f"|format(product.price) }}</td>
+
+                <td>{{ product.commercial_presentation }}</td>
+
+                <td>
+                  <span class="badge status-badge status-badge--{{ product.status }}">
+                    {{ product.status_label }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="badge availability-badge availability-badge--{{ product.availability }}">
+                    {{ product.availability_label }}
+                  </span>
+                </td>
+
+                <td class="text-end">
+                  <div class="d-flex justify-content-end flex-wrap gap-1">
+                    <a class="btn btn-sm btn-outline-secondary"
+                       href="{{ url_for('admin.product_edit', product_id=product.id) }}">
+                      Editar
+                    </a>
+
+                    {% if product.status != "activo" %}
+                      <form method="post" action="{{ url_for('admin.product_status', product_id=product.id) }}" class="d-inline">
+                        {{ status_form.csrf_token }}
+                        <input type="hidden" name="status" value="activo">
+                        <button type="submit" class="btn btn-sm btn-outline-success">Activar</button>
+                      </form>
+                    {% endif %}
+
+                    {% if product.status == "activo" %}
+                      <form method="post" action="{{ url_for('admin.product_status', product_id=product.id) }}" class="d-inline">
+                        {{ status_form.csrf_token }}
+                        <input type="hidden" name="status" value="inactivo">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Inactivar</button>
+                      </form>
+                    {% endif %}
+
+                    {% if product.status != "archivado" %}
+                      <form method="post" action="{{ url_for('admin.product_status', product_id=product.id) }}"
+                            class="d-inline"
+                            onsubmit="return confirm('¿Archivar el producto {{ product.code }}? Dejará de usarse, pero no se elimina.');">
+                        {{ status_form.csrf_token }}
+                        <input type="hidden" name="status" value="archivado">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Archivar</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <h5 class="mb-2">No hay productos que coincidan</h5>
+        <p class="text-muted mb-3">
+          Ajusta los filtros o crea un producto nuevo.
+        </p>
+        <a class="btn btn-primary" href="{{ url_for('admin.product_new') }}">
+          <i class="bi bi-plus-lg me-1"></i>Nuevo producto
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

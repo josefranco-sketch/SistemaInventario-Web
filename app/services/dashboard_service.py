@@ -5,22 +5,22 @@
 # solo presenta lo que este servicio entrega; ningún cálculo
 # vive en el template.
 #
-# NOTA IMPORTANTE: productos, inventario y cotizaciones todavía
-# no tienen modelos reales en la base de datos (llegan en los
-# Sprints 4.3, 4.4 y la Fase 6). Mientras tanto, esos indicadores
-# entregan valores de demostración claramente marcados con la
-# bandera "demo_data", para que el template ya consuma la
-# estructura final y el reemplazo sea directo sprint a sprint.
+# NOTA: inventario, cotizaciones y ventas todavía no tienen
+# modelos reales en la base de datos (llegan en el Sprint 4.4 y
+# las Fases 5-6). Mientras tanto, esos indicadores entregan
+# valores de demostración claramente marcados con la bandera
+# "demo_data", para que el reemplazo sea directo sprint a sprint.
 # ==========================================================
+from app.models.product import STATUS_ACTIVE, Product
 from app.models.user import User
 
 
 def get_dashboard_summary():
     """Regresa un diccionario con los indicadores del dashboard."""
     summary = {
-        # Demo: se conectarán al modelo Product en el Sprint 4.3
-        "total_products": 3,
-        "active_products": 2,
+        # Real desde el Sprint 4.3: la tabla products ya existe
+        "total_products": Product.query.count(),
+        "active_products": Product.query.filter_by(status=STATUS_ACTIVE).count(),
 
         # Demo: se conectará al módulo de Inventario en el Sprint 4.4
         "low_stock": 1,
