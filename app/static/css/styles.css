@@ -6,10 +6,240 @@ Este archivo contiene los estilos personalizados del Sistema Integral de Gestió
 Comercial.
 
 Bootstrap proporciona la estructura base de la interfaz, mientras que este
-archivo implementará la identidad visual definida en el Design System.
+archivo implementa la identidad visual definida en el Design System.
 
 Autor: José Franco
 Proyecto: Sistema Integral de Gestión Comercial
 ===============================================================================
 */
 
+/* =============================================================================
+   PALETA OFICIAL DEL SISTEMA
+   Variables oficiales del Design System.
+============================================================================= */
+
+:root {
+    /* Brand */
+    --la-brand: #F57DA5;
+    --la-brand-hover: #D94F82;
+    --la-brand-active: #C73A70;
+    --la-brand-soft: #FDE8F1;
+    --la-brand-border: #F7BBD2;
+
+    /* Neutral base */
+    --la-bg: #F7F8FA;
+    --la-surface: #FFFFFF;
+    --la-surface-alt: #F3F4F6;
+    --la-border: #E5E7EB;
+    --la-text: #374151;
+    --la-text-muted: #6B7280;
+    --la-carbon: #111827;
+
+    /* Categories */
+    --la-category-cosmetics: #F57DA5;
+    --la-category-cosmetics-soft: #FDE8F1;
+    --la-category-toys: #3D8DDF;
+    --la-category-toys-soft: #E8F3FF;
+    --la-category-flowers: #4CAF6F;
+    --la-category-flowers-soft: #E9F8EF;
+
+    /* States */
+    --la-success: #198754;
+    --la-success-soft: #EAF7EF;
+    --la-warning: #F59E0B;
+    --la-warning-soft: #FFF7E6;
+    --la-danger: #DC3545;
+    --la-danger-soft: #FDECEC;
+    --la-info: #0EA5E9;
+    --la-info-soft: #EAF6FD;
+    --la-disabled: #E5E7EB;
+    --la-disabled-soft: #F3F4F6;
+
+    /* Component aliases */
+    --la-primary: var(--la-brand);
+    --la-primary-hover: var(--la-brand-hover);
+    --la-secondary-bg: var(--la-surface);
+    --la-secondary-border: var(--la-border);
+    --la-link: var(--la-brand-hover);
+    --la-focus-ring: #F57DA73D;
+    --la-card-border: var(--la-border);
+    --la-sidebar-bg: var(--la-carbon);
+    --la-sidebar-active: var(--la-brand);
+}
+
+/* =============================================================================
+   ESTILOS BASE
+============================================================================= */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--la-bg);
+    color: var(--la-text);
+}
+
+/* =============================================================================
+   NAVBAR PÚBLICA
+============================================================================= */
+
+.public-navbar {
+    min-height: 72px;
+    background-color: var(--la-surface);
+    border-bottom: 1px solid var(--la-border);
+}
+
+.public-navbar__container {
+    min-height: 72px;
+    padding-inline: 16px;
+}
+
+@media (min-width: 768px) {
+    .public-navbar__container {
+        padding-inline: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .public-navbar__container {
+        padding-inline: 32px;
+    }
+}
+
+.public-navbar .navbar-brand {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    flex-shrink: 0;
+}
+
+.public-navbar__collapse {
+    align-items: center;
+}
+
+.public-navbar__menu {
+    margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+    .public-navbar__menu {
+        gap: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .public-navbar__menu {
+        gap: 32px;
+    }
+}
+
+.public-navbar .nav-link {
+    padding: 12px 8px;
+    font-weight: 500;
+    color: var(--la-text);
+    transition: color 0.2s ease;
+}
+
+.public-navbar .nav-link:hover,
+.public-navbar .nav-link:focus,
+.public-navbar .nav-link.active {
+    color: var(--la-brand-hover);
+}
+
+.navbar-toggler {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border-color: var(--la-border);
+    box-shadow: none;
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem var(--la-focus-ring);
+}
+
+.navbar-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 12px;
+    background-color: var(--la-brand);
+    border: 1px solid var(--la-brand);
+    color: #FFFFFF;
+    font-weight: 600;
+    line-height: 1;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-cta:hover,
+.navbar-cta:focus {
+    background-color: var(--la-brand-hover);
+    border-color: var(--la-brand-hover);
+    color: #FFFFFF;
+}
+
+@media (max-width: 767.98px) {
+    .public-navbar__collapse {
+        padding-top: 1rem;
+    }
+
+    .public-navbar__menu {
+        margin-top: 0.5rem;
+        gap: 0.25rem;
+    }
+
+    .navbar-cta {
+        width: 100%;
+        margin-top: 0.75rem;
+    }
+}
+
+/* =============================================================================
+   LOGO DE LA NAVBAR
+============================================================================= */
+
+.navbar-logo {
+    width: 180px;
+    max-height: 46px;
+    height: auto;
+    display: block;
+}
+
+/* =============================================================================
+   FOOTER PÚBLICO
+============================================================================= */
+
+footer {
+    background-color: var(--la-surface);
+    border-top: 1px solid var(--la-border);
+}
+
+footer h5 {
+    color: var(--la-carbon);
+}
+
+footer p {
+    color: var(--la-text-muted);
+    margin-bottom: 0;
+}
+
+footer .text-muted {
+    color: var(--la-text-muted) !important;
+}
+
+.navbar-cta {
+    background-color: var(--la-brand);
+    color: #FFFFFF;
+    border: 1px solid var(--la-brand);
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.navbar-cta:hover,
+.navbar-cta:focus {
+    background-color: var(--la-brand-hover);
+    border-color: var(--la-brand-hover);
+    color: #FFFFFF;
+}

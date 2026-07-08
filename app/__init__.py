@@ -16,6 +16,10 @@ def create_app (): #creamos la def create_app para que run.py pueda leer y ejecu
     db.init_app(app) # Conecta SQLAlchemy con Flask
     login_manager.init_app(app) # Conecta el control de sesión
 
+    @login_manager.user_loader
+    def load_user(user_id):
+        return None
+
     # Registramos los Blueprints para que formen parte de la aplicación
     app.register_blueprint(public_bp)
     app.register_blueprint(admin_bp)
