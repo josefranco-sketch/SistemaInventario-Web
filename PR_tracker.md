@@ -417,3 +417,109 @@ autenticación y redirección por rol), funciones propias con parámetros y
 archivos separados conectados con `import`, más bloque
 `if __name__ == "__main__":` en `seed_admin.py`) y librería estándar
 (`functools.wraps` en el decorador de roles, `os` en configuración).
+
+# PR #8 – Admin Dashboard (Sprint 4.2)
+
+## Información general
+
+**Fase**
+
+4 – Panel Administrativo
+
+**Sprint**
+
+4.2 – Dashboard Administrativo
+
+**Branch**
+
+feature/admin-dashboard
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Crear la pantalla principal del panel administrativo: layout interno
+reutilizable (sidebar + header), dashboard con indicadores y accesos rápidos
+hacia los módulos del sistema.
+
+---
+
+## Trabajo realizado
+
+- Plantilla base administrativa `base_admin.html`, separada del sitio
+  público, con bloques reutilizables (`page_title`, `admin_content`) para
+  todas las vistas internas de la Fase 4 en adelante.
+- Sidebar según el Design System: 256px fija en escritorio, fondo carbón
+  (`--la-carbon`), elemento activo en rosa; en móvil se convierte en menú
+  deslizable (offcanvas de Bootstrap).
+- Navegación interna completa: Dashboard activo y los módulos futuros
+  (Productos, Inventario, Usuarios, Cotizaciones, Ventas) visibles pero
+  deshabilitados, con el sprint/fase en que estarán disponibles.
+- Header administrativo con título de página, usuario en sesión, badge de
+  rol y botón de salir; botón hamburguesa en móvil.
+- Servicio `dashboard_service.py`: entrega los indicadores en un
+  diccionario; ningún cálculo vive en el template. El conteo de usuarios
+  internos es real (tabla `users`); productos, inventario, cotizaciones y
+  ventas entregan valores de demostración marcados con la bandera
+  `demo_data` hasta que existan sus modelos (Sprints 4.3, 4.4, Fases 5-6).
+- Dashboard con 6 tarjetas KPI (total de productos, activos, bajo stock,
+  cotizaciones pendientes, pedidos recientes, usuarios internos) y aviso
+  visible de datos de demostración.
+- Accesos rápidos hacia los 5 módulos internos (deshabilitados con su
+  sprint) más el acceso real al sitio público.
+- Nuevo `admin.css` (CSS por área, según la convención del proyecto), que
+  consume las variables de la paleta oficial sin hardcodear colores.
+- Bootstrap Icons integrado en el layout administrativo (única librería de
+  iconos del Design System).
+- Ruta `/admin/` protegida con `@login_required` + `@admin_required`
+  (sin cambios de seguridad respecto al Sprint 4.1).
+
+---
+
+## Archivos principales
+
+- app/templates/admin/base_admin.html (nuevo)
+- app/static/css/admin.css (nuevo)
+- app/services/dashboard_service.py (nuevo)
+- app/templates/admin/dashboard.html (reescrito sobre la pantalla base 4.1)
+- app/blueprints/admin/routes.py (modificado)
+
+---
+
+## Pruebas realizadas
+
+- /admin/ sin sesión redirige al login (protección intacta).
+- Login como administrador abre el dashboard (200).
+- Las 6 tarjetas KPI renderizan sus valores; el conteo de usuarios internos
+  sale de la base de datos real.
+- El aviso de datos de demostración se muestra.
+- Sidebar, marca, offcanvas y Bootstrap Icons presentes en el HTML.
+- admin.css se sirve correctamente (200).
+- Módulo público intacto: /, /catalog y /cotizacion responden 200.
+- Sin errores en el log de Flask.
+
+---
+
+## Pull Request
+
+**PR:** #8
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/admin-dashboard?expand=1
+
+---
+
+## Observaciones
+
+Temas de la Sección 02 (rúbrica UFM) utilizados en este sprint: diccionarios
+(el servicio entrega los KPIs como diccionario y las tarjetas se definen como
+lista de diccionarios), listas y ciclos `for` (las tarjetas KPI y los accesos
+rápidos se recorren con bucles de Jinja2), funciones con `return`
+(`get_dashboard_summary`), modularidad (servicio nuevo conectado con
+`import`) y condicionales (aviso de datos demo, elemento activo de la
+sidebar).
