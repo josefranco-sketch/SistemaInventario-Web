@@ -328,3 +328,58 @@ a.shortcut-card:hover {
         font-size: 1.35rem;
     }
 }
+
+/* --------------------------------------------------------------
+   7. Módulo de Productos (listado + formularios internos)
+   -------------------------------------------------------------- */
+
+.admin-filter-card {
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.admin-table {
+    font-size: 0.9rem;
+}
+
+.admin-table thead th {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--la-text-muted);
+    border-bottom-color: var(--la-border);
+    white-space: nowrap;
+}
+
+.admin-table td {
+    border-bottom-color: var(--la-border);
+}
+
+.admin-form-card {
+    max-width: 860px;
+}
+
+/* Badges de estado del producto (siempre texto + color) */
+.status-badge,
+.availability-badge,
+.category-chip {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.status-badge--activo     { background-color: var(--la-success-soft); color: var(--la-success); }
+.status-badge--inactivo   { background-color: var(--la-disabled-soft); color: var(--la-text-muted); }
+.status-badge--archivado  { background-color: var(--la-carbon); color: #ffffff; }
+
+.availability-badge--disponible { background-color: var(--la-success-soft); color: var(--la-success); }
+.availability-badge--baja       { background-color: var(--la-warning-soft); color: #B45309; }
+.availability-badge--agotado    { background-color: var(--la-danger-soft); color: var(--la-danger); }
+
+/* Chips de categoría con los colores de identidad de la paleta */
+.category-chip--cosmetics { background-color: var(--la-category-cosmetics-soft); color: var(--la-carbon); }
+.category-chip--toys      { background-color: var(--la-category-toys-soft); color: var(--la-carbon); }
+.category-chip--flowers   { background-color: var(--la-category-flowers-soft); color: var(--la-carbon); }

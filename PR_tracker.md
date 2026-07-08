@@ -523,3 +523,126 @@ rápidos se recorren con bucles de Jinja2), funciones con `return`
 (`get_dashboard_summary`), modularidad (servicio nuevo conectado con
 `import`) y condicionales (aviso de datos demo, elemento activo de la
 sidebar).
+
+# PR #9 – Admin Products (Sprint 4.3)
+
+## Información general
+
+**Fase**
+
+4 – Panel Administrativo
+
+**Sprint**
+
+4.3 – Gestión de Productos
+
+**Branch**
+
+feature/admin-products
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Crear el módulo administrativo de productos con base de datos real:
+aquí nace el modelo Product (fuente única de verdad del sistema), junto
+con Category y Subcategory.
+
+---
+
+## Trabajo realizado
+
+- Modelos nuevos con SQLAlchemy: `Category` (con slug estable para lógica
+  y estilos), `Subcategory` (con umbral de bajo stock configurable por
+  subcategoría, listo para el Sprint 4.4) y `Product` (código único
+  indexado, nombre, descripción, marca, precio Numeric, presentación
+  comercial, unidad de venta, estado, disponibilidad pública, imagen,
+  fechas de creación/actualización).
+- Producto → Subcategoría → Categoría normalizado: el producto no duplica
+  la categoría; se obtiene por la relación (regla de fuente única).
+- Servicio `products_service.py`: listado con filtros (texto, categoría,
+  estado), creación y edición validando código único (normalizado a
+  mayúsculas), cambio de estado activo/inactivo/archivado como única vía
+  de "retiro" (NUNCA eliminación física, regla ADR), y la regla de venta
+  mínima por categoría del ADR (cosméticos por caja/display; juguetes 3
+  unidades arriba de Q20 y 6 debajo; flores 3 ramos por código).
+- Formularios Flask-WTF: `ProductForm` (validaciones + CSRF, subcategorías
+  agrupadas por categoría en el select) y `StatusChangeForm` (los cambios
+  de estado viajan por POST con CSRF, nunca por GET).
+- Rutas admin protegidas: listado con filtros, crear, editar y cambio de
+  estado; todas con @login_required + @admin_required.
+- Listado interno con tabla responsive, badges de estado y disponibilidad
+  (texto + color), chips de categoría con los colores de identidad de la
+  paleta, estado vacío y confirmación antes de archivar.
+- Formulario crear/editar compartido con macros Jinja2 para campos.
+- Sidebar: "Productos" habilitado con estado activo; dashboard con
+  conteos reales de productos (total y activos) y acceso rápido real.
+- Script de consola `seed_catalog.py`: siembra idempotente de las 3
+  categorías, 9 subcategorías y los 3 productos de demostración del
+  catálogo público.
+- Corrección durante pruebas: campos opcionales (marca, descripción,
+  imagen) manejan None de forma segura en el servicio.
+
+---
+
+## Archivos principales
+
+- app/models/category.py, app/models/product.py (nuevos)
+- app/services/products_service.py (nuevo)
+- app/blueprints/admin/forms.py (nuevo)
+- app/templates/admin/products/list.html, form.html (nuevos)
+- seed_catalog.py (nuevo)
+- app/blueprints/admin/routes.py, app/models/__init__.py (modificados)
+- app/services/dashboard_service.py (conteos reales de productos)
+- app/templates/admin/base_admin.html, dashboard.html (modificados)
+- app/static/css/admin.css (modificado)
+
+---
+
+## Pruebas realizadas
+
+- Rutas de productos sin sesión redirigen al login.
+- Listado muestra los 3 productos sembrados con badges correctos.
+- Filtros por texto, categoría y estado funcionan contra la BD.
+- Crear producto: guarda, normaliza el código a mayúsculas y redirige.
+- Código duplicado (incluso en minúsculas) se rechaza con mensaje claro.
+- Validaciones de campos obligatorios muestran errores por campo.
+- Editar producto guarda cambios (incluido el caso de campos opcionales
+  vacíos, corregido durante las pruebas).
+- Ciclo de estados completo: inactivar → archivar → reactivar; estado
+  inválido rechazado con aviso; el producto NUNCA desaparece de la BD.
+- Regla de venta mínima verificada por categoría y por precio de juguete.
+- Dashboard muestra conteos reales; módulo público intacto (sigue con
+  datos demo hasta el Sprint 6.1, como marca el Roadmap).
+
+---
+
+## Pull Request
+
+**PR:** #9
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/admin-products?expand=1
+
+---
+
+## Observaciones
+
+La imagen del producto se maneja como nombre de archivo dentro de
+static/img/products/ (no upload de archivos): decisión alineada con el
+deploy en Vercel, cuyo sistema de archivos es de solo lectura en
+serverless. El catálogo público se conectará a estos productos reales en
+el Sprint 6.1 (Integración), según el Roadmap.
+
+Temas de la Sección 02 (rúbrica UFM): variables y tipos, condicionales
+(regla de venta mínima por categoría y precio), ciclos for (seeds y
+templates), listas y diccionarios (CATALOG/PRODUCTS del seed, choices
+agrupadas, etiquetas de estado), funciones con parámetros y return (todo
+el servicio), modularidad (modelos/servicios/formularios/rutas separados,
+if __name__ == "__main__" en seed_catalog.py) y librería estándar
+(decimal para precios, datetime en el modelo).
