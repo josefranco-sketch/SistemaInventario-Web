@@ -2,6 +2,7 @@
 # Formularios del panel administrativo (Flask-WTF).
 # ==========================================================
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField
 from wtforms import (
     DecimalField,
     HiddenField,
@@ -88,10 +89,14 @@ class ProductForm(FlaskForm):
         validators=[DataRequired(message="Elige la disponibilidad.")],
     )
 
-    image_filename = StringField(
-        "Imagen (archivo en static/img/products/)",
-        validators=[Optional(), Length(max=120, message="Máximo 120 caracteres.")],
-        default="",
+    image_file = FileField(
+        "Imagen del producto",
+        validators=[
+            FileAllowed(
+                ["png", "jpg", "jpeg", "webp"],
+                message="Solo se permiten imágenes PNG, JPG o WEBP.",
+            ),
+        ],
     )
 
 

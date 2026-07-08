@@ -6,11 +6,18 @@
 # único, cambios de estado (nunca eliminación física) y la regla
 # de venta mínima por categoría (ADR / Documento 6).
 # ==========================================================
+import os
 from decimal import Decimal
+
+from flask import current_app
+from werkzeug.utils import secure_filename
 
 from app.extensions import db
 from app.models.category import Category, Subcategory
 from app.models.product import PRODUCT_STATUSES, Product
+
+# Extensiones de imagen aceptadas (el formulario también las valida)
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 
 
 # ----------------------------------------------------------
@@ -97,6 +104,31 @@ def _clean_optional(value):
     return value
 
 
+def save_product_image(image_file, code):
+    """Guarda la imagen subida en static/img/products/ y regresa
+    el nombre final del archivo (o None si no hay imagen válida).
+
+    El archivo se nombra con el código único del producto (ej.
+    "mes3107.png"): así nunca chocan imágenes de dos productos y
+    volver a subir una imagen reemplaza la anterior.
+    """
+    if image_file is None or not image_file.filename:
+        return None
+
+    original = secure_filename(image_file.filename)
+    extension = os.path.splitext(original)[1].lower()
+
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return None  # doble seguridad: el formulario ya lo valida
+
+    filename = f"{code.lower()}{extension}"
+    folder = os.path.join(current_app.root_path, "static", "img", "products")
+    os.makedirs(folder, exist_ok=True)
+
+    image_file.save(os.path.join(folder, filename))
+    return filename
+
+
 def create_product(form):
     """Crea un producto desde el formulario validado.
 
@@ -118,7 +150,7 @@ def create_product(form):
         commercial_presentation=form.commercial_presentation.data.strip(),
         commercial_unit=form.commercial_unit.data,
         availability=form.availability.data,
-        image_filename=_clean_optional(form.image_filename.data),
+        image_filename=save_product_image(form.image_file.data, code),
     )
 
     db.session.add(product)
@@ -146,7 +178,12 @@ def update_product(product, form):
     product.commercial_presentation = form.commercial_presentation.data.strip()
     product.commercial_unit = form.commercial_unit.data
     product.availability = form.availability.data
-    product.image_filename = _clean_optional(form.image_filename.data)
+
+    # Solo se reemplaza la imagen si el admin subió un archivo nuevo;
+    # si no sube nada, se conserva la imagen actual.
+    new_image = save_product_image(form.image_file.data, code)
+    if new_image is not None:
+        product.image_filename = new_image
 
     db.session.commit()
     return product, None

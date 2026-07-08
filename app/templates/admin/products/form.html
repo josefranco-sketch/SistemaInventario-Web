@@ -59,7 +59,7 @@ de ProductForm (Flask-WTF), que incluye el token CSRF.
         </div>
       {% endif %}
 
-      <form method="post" novalidate>
+      <form method="post" enctype="multipart/form-data" novalidate>
         {{ form.csrf_token }}
 
         <div class="row g-3">
@@ -92,10 +92,27 @@ de ProductForm (Flask-WTF), que incluye el token CSRF.
           </div>
 
           <div class="col-12">
-            {{ render_field(form.image_filename, "Ej. labial-mate-mes3107.png") }}
+            {{ form.image_file.label(class="form-label fw-semibold") }}
+
+            {% if product and product.image_filename %}
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <img src="{{ url_for('static', filename='img/products/' ~ product.image_filename) }}"
+                     alt="Imagen actual de {{ product.name }}"
+                     class="admin-product-thumb">
+                <small class="text-muted">
+                  Imagen actual: <code>{{ product.image_filename }}</code>.
+                  Sube un archivo nuevo solo si quieres reemplazarla.
+                </small>
+              </div>
+            {% endif %}
+
+            {{ form.image_file(class="form-control" + (" is-invalid" if form.image_file.errors else ""), accept="image/png,image/jpeg,image/webp") }}
+            {% for error in form.image_file.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
             <small class="text-muted">
-              El archivo debe existir en <code>app/static/img/products/</code>.
-              Si se deja vacío, el catálogo mostrará una imagen genérica.
+              Opcional (PNG, JPG o WEBP, máximo 5 MB). Si el producto no tiene
+              imagen, el catálogo mostrará una imagen genérica.
             </small>
           </div>
 

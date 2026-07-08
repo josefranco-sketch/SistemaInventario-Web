@@ -646,3 +646,25 @@ agrupadas, etiquetas de estado), funciones con parámetros y return (todo
 el servicio), modularidad (modelos/servicios/formularios/rutas separados,
 if __name__ == "__main__" en seed_catalog.py) y librería estándar
 (decimal para precios, datetime en el modelo).
+
+### Adición al PR #9 (misma branch, tras revisión local del usuario)
+
+1. **Fix sidebar en escritorio**: Bootstrap fuerza fondo transparente
+   (!important) en offcanvas-lg a partir de 992px y resetea el padding del
+   cuerpo, por lo que la sidebar se veía blanca con letras blancas en
+   escritorio (en móvil sí se veía bien). Se recupera el fondo carbón y el
+   padding dentro del media query de escritorio.
+2. **Subida de imágenes desde el panel**: el campo de texto "nombre de
+   archivo" se reemplazó por un campo de subida real (Flask-WTF FileField):
+   extensiones permitidas PNG/JPG/WEBP, límite de 5 MB (MAX_CONTENT_LENGTH),
+   nombre de archivo seguro basado en el código único del producto (ej.
+   mes3107.png, así re-subir reemplaza la imagen anterior y nunca chocan dos
+   productos), guardado en static/img/products/ desde el servicio. Al editar
+   se muestra la imagen actual en miniatura y solo se reemplaza si se sube
+   un archivo nuevo. Probado: crear con imagen, editar conservando imagen,
+   y rechazo de archivos no-imagen con mensaje claro.
+
+   Nota de alcance: en el deploy de Vercel (Fase 8) el filesystem es de solo
+   lectura/efímero, por lo que las imágenes subidas en producción no
+   persisten; la administración real del catálogo (y la demo) es local.
+   La estrategia de datos para producción se define en la Fase 8.
