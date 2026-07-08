@@ -32,8 +32,9 @@ Proyecto: Sistema Integral de Gestión Comercial
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-
+  {% include 'partials/navbar.html' %}
   {% block content %}{% endblock %}
+  {% include 'partials/footer.html' %}
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

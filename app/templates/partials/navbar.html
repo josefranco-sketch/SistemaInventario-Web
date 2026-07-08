@@ -1,0 +1,71 @@
+<!--
+===============================================================================
+NAVBAR PÚBLICA
+
+Este componente contiene la barra de navegación compartida por todas las vistas
+del módulo público.
+
+Su objetivo es ofrecer una navegación consistente y responsive utilizando
+Bootstrap. La Navbar se incluye desde base.html mediante Jinja2 para evitar
+duplicar código en cada página.
+
+Durante este sprint únicamente se construye la estructura visual. Las rutas
+definitivas se agregarán en los siguientes sprints conforme se desarrollen las
+vistas correspondientes.
+
+Proyecto: Sistema Integral de Gestión Comercial
+===============================================================================
+-->
+
+<nav class="navbar navbar-expand-md navbar-light bg-white border-bottom shadow-sm public-navbar">
+    <div class="container-xl public-navbar__container">
+
+        <!-- Logo oficial de la empresa -->
+        <a class="navbar-brand d-flex align-items-center flex-shrink-0" href="#">
+            <img
+                src="{{ url_for('static', filename='img/logo-los-altos.svg') }}"
+                alt="Los Altos - Cosméticos, Accesorios y Más"
+                class="navbar-logo">
+        </a>
+
+        <button
+            class="navbar-toggler ms-auto"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Abrir navegación">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse public-navbar__collapse" id="mainNavbar">
+            <ul class="navbar-nav mx-auto align-items-md-center public-navbar__menu">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Inicio</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Catálogo</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Categorías</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Nosotros</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contacto</a>
+                </li>
+            </ul>
+
+            <a class="btn navbar-cta mt-3 mt-md-0 ms-md-4" href="#">
+                Solicitar cotización
+            </a>
+        </div>
+
+    </div>
+</nav>
