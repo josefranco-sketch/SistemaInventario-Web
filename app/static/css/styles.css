@@ -116,7 +116,22 @@ body {
 }
 
 .public-navbar__menu {
-    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    list-style: none;
+    margin: 0 auto 0;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.public-navbar__menu > li {
+    list-style: none;
+}
+
+.public-navbar__menu > li::marker {
+    content: "";
 }
 
 @media (min-width: 768px) {
@@ -133,8 +148,10 @@ body {
 
 .public-navbar .nav-link {
     padding: 12px 8px;
+
     font-weight: 500;
     color: var(--la-text);
+
     transition: color 0.2s ease;
 }
 
@@ -147,6 +164,7 @@ body {
 .navbar-toggler {
     min-height: 44px;
     padding: 0.5rem 0.75rem;
+
     border-color: var(--la-border);
     box-shadow: none;
 }
@@ -159,16 +177,25 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     min-width: 140px;
     height: 44px;
+
     padding: 0 24px;
-    border-radius: 12px;
-    background-color: var(--la-brand);
+
     border: 1px solid var(--la-brand);
+    border-radius: 12px;
+
+    background-color: var(--la-brand);
+
     color: #FFFFFF;
     font-weight: 600;
     line-height: 1;
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .navbar-cta:hover,
@@ -184,8 +211,8 @@ body {
     }
 
     .public-navbar__menu {
-        margin-top: 0.5rem;
         gap: 0.25rem;
+        margin-top: 0.5rem;
     }
 
     .navbar-cta {
@@ -596,4 +623,291 @@ footer .text-muted {
 
 .category-card:hover .category-card__title {
     color: var(--la-brand);
+}
+
+/* =========================================================
+   Sprint 3.3 - Catálogo Público
+   Estilos específicos para la pantalla de catálogo
+   Basado en el Design System oficial del proyecto
+========================================================= */
+
+:root {
+  /* Tokens visuales del proyecto */
+  --la-rosa: #F57DA5;
+  --la-rosa-hover: #DD5C8F;
+  --la-rosa-suave: #FDE7F0;
+
+  --la-carbon: #111827;
+  --la-texto: #374151;
+  --la-secundario: #6B7280;
+  --la-linea: #E5E7EB;
+  --la-fondo: #F7F8FA;
+  --la-blanco: #FFFFFF;
+
+  /* Colores de categorías */
+  --la-cosmeticos: #F57DA5;
+  --la-cosmeticos-suave: #FDE7F0;
+  --la-juguetes: #3B82F6;
+  --la-juguetes-suave: #EAF3FF;
+  --la-flores: #22C55E;
+  --la-flores-suave: #EAF8EF;
+
+  /* Estados */
+  --la-exito: #198754;
+  --la-advertencia: #F59E0B;
+  --la-error: #DC3545;
+}
+
+/* =========================================================
+   Base de la página
+========================================================= */
+
+.catalog-page {
+  background: var(--la-fondo);
+  color: var(--la-texto);
+}
+
+.catalog-page .container {
+  max-width: 1200px;
+}
+
+/* =========================================================
+   Encabezado y mensajes informativos
+========================================================= */
+
+.catalog-page h1,
+.catalog-page h2,
+.catalog-page h3 {
+  color: var(--la-carbon);
+}
+
+.catalog-page .alert {
+  border-color: var(--la-linea);
+  background: var(--la-blanco);
+}
+
+/* =========================================================
+   Panel de filtros
+   En desktop queda lateral; en móvil debe verse limpio y simple
+========================================================= */
+
+.catalog-filter-card {
+  background: var(--la-blanco);
+  border: 1px solid var(--la-linea);
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.06);
+  top: 1.5rem;
+}
+
+.catalog-filter-card .form-label {
+  color: var(--la-carbon);
+}
+
+.catalog-filter-card .form-control,
+.catalog-filter-card .form-select {
+  min-height: 44px;
+  border-color: #D0D5DD;
+  border-radius: 12px;
+  color: var(--la-carbon);
+}
+
+.catalog-filter-card .form-control:focus,
+.catalog-filter-card .form-select:focus {
+  border-color: var(--la-rosa);
+  box-shadow: 0 0 0 0.2rem rgba(245, 125, 165, 0.15);
+}
+
+.catalog-filter-card .input-group-text {
+  border-color: #D0D5DD;
+  border-radius: 12px 0 0 12px;
+  color: var(--la-secundario);
+}
+
+/* Botones del catálogo */
+.catalog-page .btn-primary {
+  background: var(--la-rosa);
+  border-color: var(--la-rosa);
+}
+
+.catalog-page .btn-primary:hover,
+.catalog-page .btn-primary:focus {
+  background: var(--la-rosa-hover);
+  border-color: var(--la-rosa-hover);
+}
+
+.catalog-page .btn-outline-secondary {
+  border-color: var(--la-linea);
+  color: var(--la-carbon);
+  background: var(--la-blanco);
+}
+
+.catalog-page .btn-outline-secondary:hover {
+  background: var(--la-fondo);
+  color: var(--la-carbon);
+  border-color: var(--la-linea);
+}
+
+/* =========================================================
+   Cards de categorías
+   Sirven como apoyo visual y siguen el color del Design System
+========================================================= */
+
+.catalog-category-card {
+  border: 1px solid var(--la-linea);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.catalog-category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.10);
+  border-color: rgba(245, 125, 165, 0.25);
+}
+
+.category-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  flex: 0 0 56px;
+}
+
+/* Fondos suaves por categoría */
+.category-cosmeticos {
+  background: linear-gradient(135deg, rgba(245, 125, 165, 0.12), rgba(253, 231, 240, 0.85));
+}
+
+.category-juguetes {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.10), rgba(234, 243, 255, 0.90));
+}
+
+.category-flores {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.10), rgba(234, 248, 239, 0.90));
+}
+
+.category-cosmeticos .category-icon {
+  background: rgba(245, 125, 165, 0.18);
+  color: var(--la-cosmeticos);
+}
+
+.category-juguetes .category-icon {
+  background: rgba(59, 130, 246, 0.18);
+  color: var(--la-juguetes);
+}
+
+.category-flores .category-icon {
+  background: rgba(34, 197, 94, 0.18);
+  color: var(--la-flores);
+}
+
+/* =========================================================
+   Cards de producto
+   Cada card presenta información pública permitida
+========================================================= */
+
+.product-card {
+  border: 1px solid var(--la-linea);
+  background: var(--la-blanco);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.10);
+  border-color: rgba(245, 125, 165, 0.22);
+}
+
+.product-visual {
+  height: 300px;
+  background: var(--la-fondo);
+  border-bottom: 1px solid var(--la-linea);
+  overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    object-position: center;
+
+    display: block;
+
+    padding: 8px;
+}
+
+.product-placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  color: var(--la-secundario);
+  background: linear-gradient(135deg, rgba(245, 125, 165, 0.06), rgba(17, 24, 39, 0.02));
+}
+
+.product-status {
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+/* =========================================================
+   Ajustes de alineación para las cards
+========================================================= */
+
+.product-card__content {
+    flex: 1 1 auto;
+}
+
+.product-title {
+    min-height: 3rem;
+}
+
+.product-price {
+    white-space: nowrap;
+}
+
+.product-presentation {
+    min-height: 2.5rem;
+}
+
+/* =========================================================
+   Estado vacío
+========================================================= */
+
+.empty-state-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.75rem;
+  background: rgba(245, 125, 165, 0.12);
+  color: var(--la-rosa);
+}
+
+/* =========================================================
+   Ajustes responsive
+========================================================= */
+
+@media (max-width: 991.98px) {
+  .catalog-filter-card {
+    position: relative !important;
+    top: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .catalog-page {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .catalog-filter-card {
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
+  }
+
+  .product-visual {
+    height: 200px;
+  }
 }

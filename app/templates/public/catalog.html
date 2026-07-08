@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{# ============================================================
+   Catálogo Público - Sprint 3.3
+   - Plantilla de solo presentación
+   - Recibe la lista de productos desde Flask
+   - Respeta la regla de no mostrar stock exacto al público
+============================================================ #}
+
+{% block title %}Catálogo | Los Altos{% endblock %}
+
+{% block content %}
+<section class="catalog-page py-5">
+  <div class="container">
+
+    {# ========================================================
+       Encabezado de la página
+       Presenta el propósito del catálogo y su contexto
+    ========================================================= #}
+    <div class="mb-4">
+      <p class="text-uppercase text-muted small fw-semibold mb-2">Módulo público</p>
+      <h1 class="display-6 fw-bold mb-2">Catálogo</h1>
+      <p class="text-muted mb-0">
+        Explora productos por código, nombre o descripción, y filtra por categoría,
+        subcategoría y disponibilidad pública.
+      </p>
+    </div>
+
+    {# ========================================================
+       Aviso importante
+       El catálogo público no expone cantidades exactas de inventario
+    ========================================================= #}
+    <div class="alert alert-light border rounded-4 mb-4" role="note">
+      <div class="d-flex align-items-start gap-2">
+        <i class="bi bi-info-circle-fill text-primary mt-1"></i>
+        <div>
+          <strong>Nota:</strong> en la vista pública no se muestran cantidades exactas de inventario.
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+      {# ======================================================
+         Panel de filtros
+         En desktop funciona como columna lateral
+         En móvil se apila arriba del listado
+      ====================================================== #}
+      <aside class="col-12 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 catalog-filter-card position-sticky top-0">
+          <div class="card-body p-4 d-flex flex-column h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h2 class="h5 fw-bold mb-0">Filtros</h2>
+              <span class="badge rounded-pill text-bg-light">Público</span>
+            </div>
+
+            <form method="get" class="catalog-filter-form">
+              {# Campo de búsqueda principal: código, nombre o descripción #}
+              <div class="mb-3">
+                <label for="q" class="form-label fw-semibold">Buscar</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="search"
+                    class="form-control"
+                    id="q"
+                    name="q"
+                    value="{{ request.args.get('q', '') }}"
+                    placeholder="Código, nombre o descripción"
+                  >
+                </div>
+              </div>
+
+              {# Filtro por categoría del negocio #}
+              <div class="mb-3">
+  <label for="category" class="form-label fw-semibold">Categoría</label>
+  <select class="form-select" id="category" name="category" onchange="this.form.submit()">
+    <option value="">Todas</option>
+    {% for category_name in categories %}
+      <option value="{{ category_name }}" {% if selected_category == category_name %}selected{% endif %}>
+        {{ category_name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="mb-3">
+  <label for="subcategory" class="form-label fw-semibold">Subcategoría</label>
+  <select class="form-select" id="subcategory" name="subcategory">
+    <option value="">Todas</option>
+    {% for subcategory_name in subcategories %}
+      <option value="{{ subcategory_name }}" {% if selected_subcategory == subcategory_name %}selected{% endif %}>
+        {{ subcategory_name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+
+              {# Filtro por disponibilidad pública #}
+              <div class="mb-4">
+                <label for="availability" class="form-label fw-semibold">Disponibilidad</label>
+                <select class="form-select" id="availability" name="availability">
+                  <option value="">Todas</option>
+                  <option value="disponible" {% if request.args.get('availability') == 'disponible' %}selected{% endif %}>Disponible</option>
+                  <option value="baja" {% if request.args.get('availability') == 'baja' %}selected{% endif %}>Baja disponibilidad</option>
+                  <option value="agotado" {% if request.args.get('availability') == 'agotado' %}selected{% endif %}>Agotado</option>
+                </select>
+              </div>
+
+              {# Acciones del formulario #}
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-funnel me-1"></i> Aplicar filtros
+                </button>
+                <a href="{{ request.path }}" class="btn btn-outline-secondary">
+                  Limpiar filtros
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </aside>
+
+      {# ======================================================
+         Área principal del catálogo
+         Aquí van resultados, categorías destacadas y cards
+      ====================================================== #}
+      <div class="col-12 col-lg-9">
+        <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3 mb-4">
+          <div>
+            <p class="text-muted small mb-1">Resultados visibles</p>
+            <h2 class="h4 fw-bold mb-0">
+              {% if products is defined and products|length %}
+                {{ products|length }} producto(s) encontrado(s)
+              {% else %}
+                Catálogo listo para conectar con datos
+              {% endif %}
+            </h2>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge rounded-pill text-bg-light px-3 py-2">Catálogo público</span>
+            <span class="badge rounded-pill text-bg-light px-3 py-2">Bootstrap + CSS propio</span>
+            <span class="badge rounded-pill text-bg-light px-3 py-2">Responsive</span>
+          </div>
+        </div>
+
+        {# ======================================================
+           Tarjetas de categorías
+           Sirven como apoyo visual para orientar al cliente
+        ====================================================== #}
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-md-4">
+            <article class="card h-100 border-0 shadow-sm rounded-4 catalog-category-card category-cosmeticos">
+              <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="category-icon">
+                  <i class="bi bi-brush"></i>
+                </div>
+                <div>
+                  <p class="text-uppercase small fw-semibold mb-1">Categoría</p>
+                  <h3 class="h6 fw-bold mb-1">Cosméticos</h3>
+                  <p class="text-muted small mb-0">Caja o display según presentación comercial.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <article class="card h-100 border-0 shadow-sm rounded-4 catalog-category-card category-juguetes">
+              <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="category-icon">
+                  <i class="bi bi-controller"></i>
+                </div>
+                <div>
+                  <p class="text-uppercase small fw-semibold mb-1">Categoría</p>
+                  <h3 class="h6 fw-bold mb-1">Juguetes</h3>
+                  <p class="text-muted small mb-0">Mínimos variables según precio del producto.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <article class="card h-100 border-0 shadow-sm rounded-4 catalog-category-card category-flores">
+              <div class="card-body p-4 d-flex align-items-center gap-3">
+                <div class="category-icon">
+                  <i class="bi bi-flower1"></i>
+                </div>
+                <div>
+                  <p class="text-uppercase small fw-semibold mb-1">Categoría</p>
+                  <h3 class="h6 fw-bold mb-1">Flores</h3>
+                  <p class="text-muted small mb-0">Venta por ramos con mínimo comercial definido.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        {# ======================================================
+           Listado de productos
+           Se renderiza solo si Flask envía productos
+           Cada card muestra información pública permitida
+        ====================================================== #}
+        <div class="row g-4">
+          {% if products is defined and products|length %}
+            {% for product in products %}
+              <div class="col-12 col-md-6 col-xxl-4">
+<article class="card h-100 border-0 shadow-sm rounded-4 product-card overflow-hidden">
+
+  <div class="product-visual">
+    {% if product.image_url is defined and product.image_url %}
+      <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+    {% else %}
+      <div class="product-placeholder">
+        <i class="bi bi-box-seam"></i>
+      </div>
+    {% endif %}
+  </div>
+
+ <div class="card-body p-4 d-flex flex-column">
+
+    <div class="flex-grow-1">
+
+      <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+        <div>
+          <span class="badge rounded-pill text-bg-light mb-2">
+            {{ product.category_name }}
+          </span>
+
+          <h3 class="h5 fw-bold mb-1" style="min-height: 3rem;">
+            {{ product.name }}
+          </h3>
+
+          <p class="text-muted small mb-0">
+            Código:
+            <strong>{{ product.code }}</strong>
+          </p>
+        </div>
+
+        <span class="badge rounded-pill product-status
+          {% if product.availability_level == 'disponible' %}
+            bg-success-subtle text-success
+          {% elif product.availability_level == 'baja' %}
+            bg-warning-subtle text-warning
+          {% else %}
+            bg-danger-subtle text-danger
+          {% endif %}">
+          {{ product.availability_label }}
+        </span>
+      </div>
+
+      <div class="border-top pt-3 mb-4" style="min-height: 6.5rem;">
+        <p class="text-muted small mb-1">Precio</p>
+        <p class="h4 fw-bold mb-3 product-price">
+          {{ product.price }}
+        </p>
+
+        <p class="text-muted small mb-1">Presentación</p>
+        <p class="fw-semibold mb-0">
+          {{ product.commercial_presentation }}
+        </p>
+      </div>
+
+    </div>
+
+    <div class="d-grid mt-auto">
+      <a href="#"
+         class="btn btn-outline-primary">
+        Ver detalle
+        <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+
+  </div>
+</article>
+              </div>
+            {% endfor %}
+          {% else %}
+            {# Estado vacío cuando todavía no se conecta la data desde Flask #}
+            <div class="col-12">
+              <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5 text-center">
+                  <div class="empty-state-icon mx-auto mb-3">
+                    <i class="bi bi-bag"></i>
+                  </div>
+                  <h3 class="h5 fw-bold mb-2">Catálogo en construcción</h3>
+                  <p class="text-muted mb-0">
+                    Esta plantilla ya quedó lista para recibir los productos desde Flask y mostrar búsqueda, filtros y cards.
+                  </p>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
