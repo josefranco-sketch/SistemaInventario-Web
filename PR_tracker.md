@@ -1003,3 +1003,125 @@ buscador), ciclos for (resultados), listas y diccionarios (resultados del
 servicio como lista de diccionarios, UNIT_PLURALS), funciones con
 parámetros y return, modularidad (blueprint + servicio que reutiliza
 otros dos servicios vía import).
+
+# PR #13 – Sales Orders (Sprint 5.2)
+
+## Información general
+
+**Fase**
+
+5 – Sistema de Ventas
+
+**Sprint**
+
+5.2 – Creación de Pedido
+
+**Branch**
+
+feature/sales-orders
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Permitir que el vendedor cree pedidos internos: armar el pedido con
+productos existentes, validar mínimos por categoría, calcular totales
+automáticamente y confirmarlo como Pendiente de pago — sin tocar
+inventario.
+
+---
+
+## Trabajo realizado
+
+- Modelos nuevos `Order` y `OrderItem` (tablas orders/order_items según
+  la Arquitectura Técnica): estados borrador → pendiente → pagado /
+  cancelado, código legible único (PED-0001), vendedor con trazabilidad,
+  datos básicos del cliente, y renglones que apuntan SIEMPRE a productos
+  existentes con restricción única por pedido (no duplicar) y precio
+  congelado al momento de agregar (un cambio de precio posterior no
+  altera pedidos armados). Subtotales y total son propiedades calculadas,
+  nunca datos escritos a mano.
+- Servicio `orders_service.py`:
+  - Un borrador activo por vendedor ("pedido actual"); al confirmarse,
+    el siguiente producto abre borrador nuevo.
+  - Agregar producto: usa la venta mínima de la categoría como cantidad
+    inicial; repetir un producto incrementa su renglón (no se duplica);
+    productos no activos rechazados.
+  - Incrementar/disminuir con piso en la venta mínima (para menos, se
+    quita el renglón completo); quitar producto.
+  - Confirmación: exige productos, nombre de cliente, productos aún
+    activos y mínimos cumplidos; pasa a Pendiente de pago.
+  - REGLA ADR: el servicio no importa siquiera el inventario — un
+    borrador o pendiente jamás descuenta stock (el pago llega en 5.3).
+- Rutas protegidas en el blueprint sales: pedido actual, agregar desde el
+  buscador (regresando a la búsqueda), cambiar cantidad, quitar,
+  confirmar, lista "Mis pedidos" y detalle de pedido (el vendedor ve los
+  suyos; el admin puede ver todos). Verificación de propiedad: nadie
+  manipula renglones de pedidos ajenos o ya confirmados.
+- Vistas: pedido actual (tabla de renglones con + / −, resumen, datos del
+  cliente y confirmación con aviso de que no descuenta inventario),
+  detalle de solo lectura y lista de pedidos con badges de estado.
+- Buscador del vendedor: botón "Agregar" por producto (POST con CSRF,
+  cantidad = venta mínima) que regresa a la búsqueda actual.
+- Navegación de ventas: "Pedido actual" y "Mis pedidos" habilitados.
+
+---
+
+## Archivos principales
+
+- app/models/order.py, app/services/orders_service.py (nuevos)
+- app/blueprints/sales/forms.py (nuevo)
+- app/templates/sales/{order,order_detail,orders_list}.html (nuevos)
+- app/blueprints/sales/routes.py (rutas de pedido)
+- app/templates/sales/{base_sales,panel}.html (nav y botón Agregar)
+- app/models/__init__.py, app/static/css/sales.css
+
+---
+
+## Pruebas realizadas
+
+- Servicio: borrador único por vendedor; mínimos por categoría al agregar
+  (cosmético 1, juguete 3, flores 3) y su piso al disminuir; repetir
+  producto incrementa el renglón; quitar; precio congelado verificado
+  cambiando el precio del producto; totales automáticos correctos;
+  confirmación rechazada sin cliente o con producto inactivado en el
+  camino; pedido confirmado inmodificable; nuevo borrador tras confirmar.
+- REGLA ADR verificada dos veces (servicio y HTTP): el stock quedó
+  idéntico antes y después de armar y confirmar pedidos.
+- HTTP con sesión real: agregar desde el buscador regresa a la búsqueda,
+  vista de pedido con + / −, mensaje al intentar bajar del mínimo,
+  confirmar sin nombre muestra error, confirmación correcta redirige al
+  detalle, lista de pedidos, y un vendedor no puede tocar renglones de
+  pedidos ajenos (verificación de propiedad).
+- Módulo público intacto; log sin errores.
+- Quedan dos pedidos pendientes de pago como datos de demostración para
+  el Sprint 5.3.
+
+---
+
+## Pull Request
+
+**PR:** #13
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/sales-orders?expand=1
+
+---
+
+## Observaciones
+
+Decisión de diseño: un solo borrador activo por vendedor (su "pedido
+actual"), igual que la cotización pública usa una sesión única — simplifica
+la operación en mostrador. El precio se congela por renglón al agregarse.
+
+Temas de la Sección 02 (rúbrica UFM): condicionales (validaciones de
+mínimos y estados), ciclos for (totales calculados recorriendo renglones,
+render de tablas), listas (order.items), diccionarios (etiquetas de
+estado), funciones con parámetros y return (todo el servicio), modularidad
+(modelo/servicio/formularios/rutas/templates) y librería estándar
+(decimal para dinero, datetime).
