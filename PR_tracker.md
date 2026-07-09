@@ -1365,3 +1365,109 @@ cancelación y permisos), ciclos for (tablas e historial), listas y
 diccionarios, funciones con parámetros y return, modularidad, y librería
 estándar (datetime/timedelta en filtros de fecha y conteo de recientes —
 incluida la corrección de zona horaria).
+
+# PR #16 – Integration: Products → Public Catalog (Sprint 6.1)
+
+## Información general
+
+**Fase**
+
+6 – Integración
+
+**Sprint**
+
+6.1 – Integración Productos Admin → Catálogo Público
+
+**Branch**
+
+feature/integration-products-catalog
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Conectar los productos administrados desde el panel con el catálogo
+público: el catálogo deja los datos de prueba de la Fase 3 y lee la base
+de datos real. Inicia la Fase 6.
+
+---
+
+## Trabajo realizado
+
+- Nuevo `catalog_service.py`: la ÚNICA puerta de los datos reales hacia
+  el cliente público. Solo entrega productos ACTIVOS y jamás incluye el
+  stock exacto (regla ADR): únicamente el nivel de disponibilidad con su
+  etiqueta (Disponible / Baja disponibilidad / Agotado). Entrega la misma
+  estructura que los templates públicos ya consumían, por lo que el
+  cambio de fuente fue transparente para las vistas.
+- Rutas públicas reescritas: catálogo con filtros reales contra BD
+  (texto sobre código/nombre/descripción, categoría, subcategoría,
+  disponibilidad) y detalle por código (los inactivos/archivados
+  devuelven 404 al público). `_get_demo_products()` eliminado — sin
+  datos mock en el flujo público.
+- Filtros de categorías/subcategorías del catálogo generados desde la
+  base real.
+- El flujo de cotización pública funciona con los productos reales sin
+  cambios (recibe código/nombre/precio desde el detalle, verificado
+  end-to-end con la sesión).
+- Imagen genérica `placeholder.svg` para productos sin fotografía.
+- Fix CSS: la ficha de detalle generaba la clase `availability-baja`
+  (nivel real de BD) pero el CSS solo tenía `availability-baja-
+  disponibilidad`; se agregó la regla para que el badge ámbar aplique.
+
+---
+
+## Archivos principales
+
+- app/services/catalog_service.py (nuevo)
+- app/blueprints/public/routes.py (reescrito — sin datos mock)
+- app/static/img/products/placeholder.svg (nuevo)
+- app/static/css/styles.css (fix badge baja disponibilidad)
+
+---
+
+## Pruebas realizadas
+
+- Catálogo muestra los productos reales con los 3 niveles de
+  disponibilidad reflejando el inventario (baja / disponible / agotado).
+- El HTML público no contiene la palabra "stock" ni clases internas —
+  el cliente no ve existencias exactas.
+- Filtros contra BD: texto, categoría, subcategoría dependiente y
+  disponibilidad, incluidas combinaciones.
+- Detalle real: precio, marca, descripción y badge con el CSS corregido;
+  "Agregar a cotización" desde la ficha real funciona (item en sesión).
+- Admin inactiva → desaparece del catálogo y su detalle da 404; archiva
+  → igual; reactiva → vuelve a aparecer.
+- Cadena completa de la DoD: admin crea producto (ROSA-01) → aparece de
+  inmediato en el catálogo público como Agotado (nace sin stock) con la
+  imagen genérica → primera entrada de inventario → el catálogo lo
+  muestra Disponible sin exponer la cantidad.
+- Home, login y paneles internos intactos; log sin errores.
+
+---
+
+## Pull Request
+
+**PR:** #16
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/integration-products-catalog?expand=1
+
+---
+
+## Observaciones
+
+El flujo público completo (Home → Catálogo → Detalle → Cotización) opera
+ahora sobre la fuente única de productos. La conversión de cotización a
+pedido llega en el Sprint 6.2.
+
+Temas de la Sección 02 (rúbrica UFM): funciones con parámetros y return,
+diccionarios (vista pública del producto), listas y ciclos (catálogo y
+filtros), condicionales (visibilidad por estado), modularidad (servicio
+de catálogo que compone productos e inventario indirectamente vía
+disponibilidad).

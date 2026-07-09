@@ -1142,3 +1142,10 @@ footer .text-muted {
         padding: 1.5rem;
     }
 }
+
+/* Nivel "baja" del catálogo real (Sprint 6.1): mismo estilo que la
+   clase original de baja disponibilidad del Design System */
+.product-detail-page .availability-baja {
+    background: #fff7e6;
+    color: #b45309;
+}
