@@ -1919,3 +1919,26 @@ https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature
 
 Con esta pasada la **Fase 7 queda completada** y el proyecto está listo
 para la Fase 8 (README final → deploy en Vercel → presentación).
+
+# PR #21 – UI Fixes (post-Fase 7, solicitados por el usuario)
+
+**Branch:** feature/ui-fixes · **Estado:** 🔍 En revisión
+
+Ajustes detectados por el usuario probando el PR #20:
+
+1. La sidebar del panel admin mostraba "Cotizaciones" deshabilitado con
+   el badge "F6" — olvido del Sprint 6.2 (se habilitó el acceso rápido
+   del dashboard pero no el enlace de la sidebar). Ahora enlaza a la
+   bandeja de cotizaciones, y los estados activos de "Cotizaciones" y
+   "Ventas" no se pisan entre sí.
+2. Catálogo público: eliminados los textos de desarrollo de la Fase 3 —
+   la nota "en la vista pública no se muestran cantidades exactas…" y
+   los badges "Catálogo público / Bootstrap + CSS propio / Responsive".
+3. El encabezado del catálogo sin resultados decía "Catálogo listo para
+   conectar con datos" (obsoleto desde el 6.1): ahora dice "No hay
+   productos que coincidan".
+
+Probado: enlace de sidebar funcionando con activo correcto, textos
+eliminados, estado vacío con el texto nuevo, log limpio.
+
+**Enlace:** https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/ui-fixes?expand=1

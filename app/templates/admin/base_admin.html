@@ -89,17 +89,13 @@ Proyecto: Sistema Integral de Gestión Comercial
             <span>Usuarios</span>
           </a>
 
-          {# Los siguientes módulos se habilitan en sus fases.
-             Mientras tanto se muestran deshabilitados para que la
-             navegación completa ya sea visible. #}
-          <span class="admin-sidebar__link admin-sidebar__link--disabled"
-                title="Disponible en la Fase 6">
+          <a class="admin-sidebar__link {% if request.endpoint and request.endpoint.startswith('sales.quote') %}active{% endif %}"
+             href="{{ url_for('sales.quotes_list') }}">
             <i class="bi bi-file-earmark-text"></i>
             <span>Cotizaciones</span>
-            <small class="admin-sidebar__soon">F6</small>
-          </span>
+          </a>
 
-          <a class="admin-sidebar__link {% if request.endpoint and request.endpoint.startswith('sales.') %}active{% endif %}"
+          <a class="admin-sidebar__link {% if request.endpoint and request.endpoint.startswith('sales.') and not request.endpoint.startswith('sales.quote') %}active{% endif %}"
              href="{{ url_for('sales.panel') }}">
             <i class="bi bi-cart"></i>
             <span>Ventas</span>
