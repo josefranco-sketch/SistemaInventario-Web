@@ -4,7 +4,9 @@ Sistema web con catálogo digital público, cotizaciones en línea, panel
 administrativo y sistema de ventas en tienda, conectados a un mismo
 inventario.
 
-> **Deploy (demo):** _URL pendiente de pegar tras el primer deploy en Vercel._
+> **Deploy (demo):** https://sistema-inventario-web-josefranco-sketchs-projects.vercel.app
+>
+> Usuarios de la demo: `admin` / `admin123` y `vendedor` / `venta123`.
 >
 > La demo en línea corre en Vercel como función serverless con una base de
 > datos de demostración: todo funciona (catálogo, cotizaciones, login,
