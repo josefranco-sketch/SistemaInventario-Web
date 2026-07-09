@@ -4,7 +4,14 @@ Sistema web con catálogo digital público, cotizaciones en línea, panel
 administrativo y sistema de ventas en tienda, conectados a un mismo
 inventario.
 
-> **Deploy:** _pendiente — el enlace de Vercel se agrega en el Sprint 8.2._
+> **Deploy (demo):** _URL pendiente de pegar tras el primer deploy en Vercel._
+>
+> La demo en línea corre en Vercel como función serverless con una base de
+> datos de demostración: todo funciona (catálogo, cotizaciones, login,
+> ventas), pero los cambios hechos en línea son **temporales** — cuando la
+> función se reinicia, la demo vuelve a su estado inicial. La subida de
+> imágenes solo está disponible en local (el filesystem del deploy es de
+> solo lectura). La operación real del negocio es local.
 
 ## Descripción
 
@@ -110,6 +117,7 @@ El vendedor de prueba se crea desde el panel: **Usuarios → Nuevo usuario** (ro
 | `seed_catalog.py` | Siembra categorías, subcategorías y productos de ejemplo (se puede repetir; no duplica). |
 | `verify_integration.py` | Corre 9 verificaciones automáticas de las reglas de negocio de punta a punta y deja la base como estaba. |
 | `migrate_payment_fields.py` | Solo para bases creadas antes del Sprint 5.3 (agrega columnas de pago). Un clon nuevo no lo necesita. |
+| `build_demo_db.py` | Regenera la base de demostración del deploy (`deploy/demo_app.db`). |
 
 ## Estructura del proyecto
 

@@ -123,9 +123,16 @@ def save_product_image(image_file, code):
 
     filename = f"{code.lower()}{extension}"
     folder = os.path.join(current_app.root_path, "static", "img", "products")
-    os.makedirs(folder, exist_ok=True)
 
-    image_file.save(os.path.join(folder, filename))
+    try:
+        os.makedirs(folder, exist_ok=True)
+        image_file.save(os.path.join(folder, filename))
+    except OSError:
+        # En el deploy de demostración (Vercel) el sistema de archivos
+        # es de solo lectura: el producto se guarda sin imagen en lugar
+        # de fallar. La carga real de imágenes se hace en local.
+        return None
+
     return filename
 
 

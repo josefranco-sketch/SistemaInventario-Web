@@ -3,3 +3,6 @@
 __pycache__/
 instance/
 *.db
+
+# La base de demostración del deploy SÍ se versiona (excepción a *.db)
+!deploy/demo_app.db
