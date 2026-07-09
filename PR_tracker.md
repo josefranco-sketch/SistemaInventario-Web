@@ -2076,3 +2076,43 @@ Verificado en simulación local (VERCEL=1 + test_client): home, catálogo,
 login y detalle en 200, base de demo copiada a /tmp.
 
 **Enlace:** https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/vercel-deploy-fix?expand=1
+
+# Sprint 8.2 – Deploy en Vercel (PRs #23–#35)
+
+**Estado:** ✅ Completado — sistema publicado y funcionando
+
+**URL de producción:**
+https://sistema-inventario-web-josefranco-sketchs-projects.vercel.app
+
+## Resumen del sprint (y de su depuración)
+
+- PR #23: configuración inicial (api/index.py, vercel.json, base de
+  demostración efímera copiada a /tmp, build_demo_db.py, upload de
+  imágenes protegido en filesystem de solo lectura).
+- El primer deploy falló en runtime con el error genérico de Vercel.
+  Depuración iterativa con un modo diagnóstico temporal:
+  - PR #25: sys.path explícito + includeFiles (no fue la causa).
+  - PR #27/#29: diagnóstico que expone el traceback real; el propio
+    diagnóstico reveló que el builder exige la variable "app" al nivel
+    superior del entrypoint (los builds estaban fallando en silencio y
+    Vercel seguía sirviendo el deployment viejo).
+  - PR #30: app/blueprints/ era un namespace package sin __init__.py
+    (necesario, pero no suficiente).
+  - PR #32: diagnóstico profundo — árbol completo del bundle: reveló la
+    CAUSA RAÍZ: Vercel excluye del bundle cualquier carpeta llamada
+    "public" (a cualquier profundidad; la reserva para estáticos).
+    Faltaban exactamente app/blueprints/public y app/templates/public.
+  - PR #33: renombre a app/blueprints/site y app/templates/site (el
+    blueprint conserva el NOMBRE "public": ningún url_for cambió).
+  - PR #35 (este): retiro del modo diagnóstico y URL en el README.
+- Protección de Vercel desactivada para acceso público; producción
+  desde main (actualizado vía PRs dev→main #24/#26/#28/#31/#34).
+
+## Verificado en producción
+
+- Home, catálogo (con badges de disponibilidad de la demo), detalle,
+  cotización y login responden 200.
+- Login de admin funciona en serverless (sesión → dashboard con KPIs).
+- Base de demostración se restaura sola en cada arranque en frío
+  (verificado: un producto creado en línea desapareció tras el reinicio).
+- Modo local intacto (instance/app.db) y verify_integration 9/9.
