@@ -1942,3 +1942,50 @@ Probado: enlace de sidebar funcionando con activo correcto, textos
 eliminados, estado vacío con el texto nuevo, log limpio.
 
 **Enlace:** https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/ui-fixes?expand=1
+
+# PR #22 – Final README (Sprint 8.1)
+
+## Información general
+
+**Fase:** 8 – Deploy y Entrega · **Sprint:** 8.1 – README Final y
+Documentación de Entrega · **Branch:** feature/final-documentation
+**Estado:** 🔍 En revisión
+
+---
+
+## Trabajo realizado
+
+- README final reescrito conservando la redacción original del usuario
+  (la rúbrica pide "palabras propias") y corrigiendo tres afirmaciones
+  que no correspondían a lo construido (descuentos mayoristas por
+  producto, reportes, precio especial por volumen — no existen en el
+  sistema y podían generar preguntas incómodas en la presentación).
+- Secciones nuevas: tecnologías utilizadas y arquitectura, instrucciones
+  de instalación paso a paso (macOS/Windows), usuarios de prueba,
+  configuración (SECRET_KEY), tabla de scripts útiles, estructura del
+  proyecto, flujo completo del sistema, QUÉ SE INVESTIGÓ FUERA DEL CURSO
+  (requisito explícito de la rúbrica), alcance y limitaciones (sin SAT,
+  sin pagos en línea, sin bodega, sin proveedores, sin importaciones) y
+  estado final. Espacio reservado para el enlace del deploy (se llena en
+  el Sprint 8.2).
+- Nota de solución del conflicto de puerto 5000 con AirPlay en Mac
+  (problema real que el usuario encontró).
+
+---
+
+## Pruebas realizadas
+
+Las instrucciones de instalación se verificaron con un CLON FRESCO del
+repositorio siguiendo el README tal cual: entorno virtual, dependencias,
+seed_admin, seed_catalog, servidor arriba, rutas públicas 200, login
+admin funcionando y verify_integration 9/9 en el clon.
+
+---
+
+## Pull Request
+
+**PR:** #22
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/final-documentation?expand=1
