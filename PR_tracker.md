@@ -668,3 +668,122 @@ if __name__ == "__main__" en seed_catalog.py) y librería estándar
    lectura/efímero, por lo que las imágenes subidas en producción no
    persisten; la administración real del catálogo (y la demo) es local.
    La estrategia de datos para producción se define en la Fase 8.
+
+# PR #10 – Admin Inventory (Sprint 4.4)
+
+## Información general
+
+**Fase**
+
+4 – Panel Administrativo
+
+**Sprint**
+
+4.4 – Gestión de Inventario
+
+**Branch**
+
+feature/admin-inventory
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Controlar las existencias en tienda: stock por producto, movimientos con
+historial obligatorio, umbral de bajo stock configurable por subcategoría y
+disponibilidad pública calculada desde el inventario.
+
+---
+
+## Trabajo realizado
+
+- Modelos nuevos: `Inventory` (existencia por producto, relación 1 a 1 con
+  el producto existente — nunca se duplican productos) e
+  `InventoryMovement` (historial con usuario, fecha, motivo obligatorio,
+  tipo entrada/salida, cantidad y stock antes/después para auditoría).
+- Servicio `inventory_service.py`:
+  - `register_movement`: valida TODO antes de tocar la base (tipo,
+    cantidad positiva, motivo obligatorio, stock suficiente — una salida
+    jamás deja stock negativo), actualiza existencia, deja historial y
+    recalcula la disponibilidad pública.
+  - `compute_availability`: stock 0 → Agotado; 1..umbral → Baja
+    disponibilidad; mayor → Disponible. El cliente ve solo el badge,
+    nunca el número.
+  - Umbral de bajo stock configurable por subcategoría (regla ADR), con
+    pantalla de configuración; al cambiar un umbral se recalcula la
+    disponibilidad de los productos afectados.
+  - `count_low_stock` para el KPI del dashboard (ahora real).
+- Vistas admin protegidas: inventario con stock exacto y filtros (texto,
+  categoría, solo bajo stock), formulario de movimiento, historial (global
+  y por producto) y umbrales por subcategoría.
+- La disponibilidad pública dejó de ser manual: se quitó el selector del
+  formulario de producto; un producto nuevo nace agotado (sin stock) hasta
+  su primera entrada. Nota informativa en el formulario.
+- Sidebar y dashboard: Inventario habilitado; KPI de bajo stock real.
+- Regla ADR respetada: el inventario NO baja por cotizaciones ni pedidos
+  pendientes; el descuento por venta pagada llega en la Fase 5 (reusará
+  este servicio para dejar historial).
+
+---
+
+## Archivos principales
+
+- app/models/inventory.py (nuevo)
+- app/services/inventory_service.py (nuevo)
+- app/templates/admin/inventory/{list,movement_form,history,thresholds}.html (nuevos)
+- app/blueprints/admin/routes.py, app/blueprints/admin/forms.py (modificados)
+- app/services/products_service.py, app/services/dashboard_service.py (modificados)
+- app/templates/admin/{base_admin,dashboard}.html (modificados)
+- app/templates/admin/products/form.html (modificado — sin selector manual)
+- app/models/__init__.py, app/static/css/admin.css (modificados)
+
+---
+
+## Pruebas realizadas
+
+- Servicio: tipo inválido, cantidad 0, motivo vacío y salida sin stock
+  rechazados SIN tocar la base; entradas y salidas actualizan stock e
+  historial; transiciones disponible → baja → agotado → disponible
+  verificadas; umbral inválido (texto o negativo) rechazado.
+- HTTP con sesión real: vista de inventario, movimiento (entrada),
+  salida sin motivo rechazada por el formulario, salida excesiva rechazada
+  por el servicio con mensaje claro, filtro "solo bajo stock", historial
+  global y por producto con usuario visible, umbrales GET/POST.
+- Dashboard: KPI de bajo stock real (verificado con umbral modificado).
+- Regresión: producto nuevo nace agotado y el formulario ya no tiene
+  selector de disponibilidad; módulo público intacto.
+- Bugs corregidos durante pruebas: (1) un movimiento rechazado dejaba un
+  INSERT pendiente en la sesión; (2) crear el inventario por product_id
+  no actualizaba la relación en memoria y podía duplicar la fila. Se
+  reestructuró el servicio: validar primero, tocar la base al final, y
+  crear el inventario vía relación.
+
+---
+
+## Pull Request
+
+**PR:** #10
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/admin-inventory?expand=1
+
+---
+
+## Observaciones
+
+Decisión de diseño (alineada al Roadmap "preparar disponibilidad pública
+según inventario"): la disponibilidad dejó de ser un campo manual del
+producto y ahora se deriva del stock y el umbral de la subcategoría. El
+badge del catálogo público reflejará esto al integrar en el Sprint 6.1.
+
+Temas de la Sección 02 (rúbrica UFM): condicionales (validaciones del
+movimiento y cálculo de disponibilidad), ciclos for y while implícitos en
+conteos (count_low_stock recorre productos), listas y diccionarios
+(umbrales por formulario dinámico), funciones con parámetros y return
+(todo el servicio), modularidad (modelo/servicio/rutas/templates) y
+librería estándar (datetime en los movimientos).

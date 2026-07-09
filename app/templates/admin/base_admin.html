@@ -77,16 +77,15 @@ Proyecto: Sistema Integral de Gestión Comercial
             <span>Productos</span>
           </a>
 
+          <a class="admin-sidebar__link {% if request.endpoint and request.endpoint.startswith('admin.inventory') %}active{% endif %}"
+             href="{{ url_for('admin.inventory_list') }}">
+            <i class="bi bi-clipboard-data"></i>
+            <span>Inventario</span>
+          </a>
+
           {# Los siguientes módulos se habilitan en sus sprints.
              Mientras tanto se muestran deshabilitados para que la
              navegación completa ya sea visible. #}
-          <span class="admin-sidebar__link admin-sidebar__link--disabled"
-                title="Disponible en el Sprint 4.4">
-            <i class="bi bi-clipboard-data"></i>
-            <span>Inventario</span>
-            <small class="admin-sidebar__soon">4.4</small>
-          </span>
-
           <span class="admin-sidebar__link admin-sidebar__link--disabled"
                 title="Disponible en el Sprint 4.5">
             <i class="bi bi-people"></i>

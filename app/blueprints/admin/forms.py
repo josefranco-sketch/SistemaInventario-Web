@@ -6,16 +6,15 @@ from flask_wtf.file import FileAllowed, FileField
 from wtforms import (
     DecimalField,
     HiddenField,
+    IntegerField,
     SelectField,
     StringField,
     TextAreaField,
 )
 from wtforms.validators import DataRequired, Length, NumberRange, Optional
 
-from app.models.product import (
-    AVAILABILITY_LABELS,
-    COMMERCIAL_UNITS,
-)
+from app.models.inventory import MOVEMENT_LABELS
+from app.models.product import COMMERCIAL_UNITS
 
 
 class ProductForm(FlaskForm):
@@ -83,12 +82,6 @@ class ProductForm(FlaskForm):
         validators=[DataRequired(message="Elige la unidad de venta.")],
     )
 
-    availability = SelectField(
-        "Disponibilidad pública",
-        choices=[(level, label) for level, label in AVAILABILITY_LABELS.items()],
-        validators=[DataRequired(message="Elige la disponibilidad.")],
-    )
-
     image_file = FileField(
         "Imagen del producto",
         validators=[
@@ -108,3 +101,40 @@ class StatusChangeForm(FlaskForm):
     """
 
     status = HiddenField(validators=[DataRequired()])
+
+
+class MovementForm(FlaskForm):
+    """Formulario para registrar una entrada o salida de inventario.
+
+    El motivo es obligatorio: cada movimiento debe dejar historial
+    con usuario, fecha y motivo (regla ADR, sin excepción).
+    """
+
+    movement_type = SelectField(
+        "Tipo de movimiento",
+        choices=[(value, label) for value, label in MOVEMENT_LABELS.items()],
+        validators=[DataRequired(message="Elige el tipo de movimiento.")],
+    )
+
+    quantity = IntegerField(
+        "Cantidad",
+        validators=[
+            DataRequired(message="La cantidad es obligatoria."),
+            NumberRange(min=1, message="La cantidad debe ser mayor a cero."),
+        ],
+    )
+
+    reason = StringField(
+        "Motivo",
+        validators=[
+            DataRequired(message="El motivo es obligatorio."),
+            Length(max=200, message="Máximo 200 caracteres."),
+        ],
+    )
+
+
+class ThresholdsForm(FlaskForm):
+    """Formulario vacío: aporta el token CSRF a la pantalla de
+    umbrales, cuyos campos se generan dinámicamente por
+    subcategoría en el template."""
+

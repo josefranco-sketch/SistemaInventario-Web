@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 from app.extensions import db
 from app.models.category import Category, Subcategory
-from app.models.product import PRODUCT_STATUSES, Product
+from app.models.product import AVAILABILITY_OUT, PRODUCT_STATUSES, Product
 
 # Extensiones de imagen aceptadas (el formulario también las valida)
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
@@ -149,7 +149,9 @@ def create_product(form):
         price=form.price.data,
         commercial_presentation=form.commercial_presentation.data.strip(),
         commercial_unit=form.commercial_unit.data,
-        availability=form.availability.data,
+        # Un producto nuevo nace sin stock, por lo tanto agotado; la
+        # disponibilidad la recalcula el inventario con cada movimiento.
+        availability=AVAILABILITY_OUT,
         image_filename=save_product_image(form.image_file.data, code),
     )
 
@@ -177,7 +179,8 @@ def update_product(product, form):
     product.price = form.price.data
     product.commercial_presentation = form.commercial_presentation.data.strip()
     product.commercial_unit = form.commercial_unit.data
-    product.availability = form.availability.data
+    # La disponibilidad pública ya no se edita a mano: la calcula el
+    # inventario según stock y umbral de la subcategoría (Sprint 4.4).
 
     # Solo se reemplaza la imagen si el admin subió un archivo nuevo;
     # si no sube nada, se conserva la imagen actual.
