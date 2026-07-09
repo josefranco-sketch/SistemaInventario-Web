@@ -212,4 +212,32 @@ def order_detail(order_id):
     if order.is_editable and order.seller_id == current_user.id:
         return redirect(url_for("sales.current_order"))
 
-    return render_template("sales/order_detail.html", order=order)
+    return render_template(
+        "sales/order_detail.html",
+        order=order,
+        pay_form=CsrfOnlyForm(),
+    )
+
+
+@sales_bp.route("/orders/<int:order_id>/pay", methods=["POST"])
+@login_required
+@seller_required
+def order_pay(order_id):
+    order = orders_service.get_order_or_none(order_id)
+
+    # El vendedor cobra sus pedidos; el administrador puede cobrar todos
+    if order is None or (
+        order.seller_id != current_user.id and not current_user.is_admin()
+    ):
+        flash("El pedido no existe.", "danger")
+        return redirect(url_for("sales.orders_list"))
+
+    form = CsrfOnlyForm()
+    if not form.validate_on_submit():
+        flash("No se pudo registrar el pago.", "danger")
+        return redirect(url_for("sales.order_detail", order_id=order.id))
+
+    ok, message = orders_service.mark_as_paid(order, current_user)
+    flash(message, "success" if ok else "warning")
+
+    return redirect(url_for("sales.order_detail", order_id=order.id))

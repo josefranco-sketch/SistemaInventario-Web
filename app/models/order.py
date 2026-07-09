@@ -42,15 +42,22 @@ class Order(db.Model):
     # Código legible del pedido (ej. PED-0001), único
     code = db.Column(db.String(20), unique=True, nullable=False)
 
-    # Vendedor que arma el pedido (trazabilidad)
+    # Vendedor que arma el pedido (trazabilidad).
+    # foreign_keys es necesario porque el pedido tiene dos relaciones
+    # hacia users (quien vende y quien cobra).
     seller_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    seller = db.relationship("User")
+    seller = db.relationship("User", foreign_keys=[seller_id])
 
     # Datos básicos del cliente (sin cuentas de cliente: venta en tienda)
     customer_name = db.Column(db.String(120), nullable=True)
     customer_phone = db.Column(db.String(30), nullable=True)
 
     status = db.Column(db.String(20), nullable=False, default=ORDER_DRAFT)
+
+    # Trazabilidad del pago (Sprint 5.3): cuándo se pagó y quién lo cobró
+    paid_at = db.Column(db.DateTime, nullable=True)
+    paid_by_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    paid_by = db.relationship("User", foreign_keys=[paid_by_id])
 
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(

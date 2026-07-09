@@ -19,6 +19,7 @@ from app.models.category import Subcategory
 from app.models.inventory import (
     MOVEMENT_ENTRY,
     MOVEMENT_EXIT,
+    MOVEMENT_LABELS,
     MOVEMENT_TYPES,
     Inventory,
     InventoryMovement,
@@ -129,12 +130,16 @@ def refresh_availability(product):
 # Registro de movimientos
 # ----------------------------------------------------------
 
-def register_movement(product, user, movement_type, quantity, reason):
-    """Registra una entrada o salida manual de inventario.
+def register_movement(product, user, movement_type, quantity, reason, commit=True):
+    """Registra un movimiento de inventario (entrada, salida o venta).
 
     Valida el movimiento, actualiza la existencia, deja el
     historial (usuario, fecha, motivo, stock antes/después) y
     recalcula la disponibilidad pública.
+
+    Con commit=False deja los cambios pendientes en la sesión para
+    que quien llama confirme todo junto (lo usa el pago de pedidos,
+    que descuenta varios productos en una sola transacción).
 
     Regresa (True, mensaje) o (False, mensaje de error).
     """
@@ -154,10 +159,10 @@ def register_movement(product, user, movement_type, quantity, reason):
 
     if movement_type == MOVEMENT_ENTRY:
         after = before + quantity
-    else:  # salida
+    else:  # salida o venta: ambas descuentan
         if quantity > before:
             return False, (
-                f"Stock insuficiente: hay {before} y la salida pide {quantity}."
+                f"Stock insuficiente: hay {before} y se piden {quantity}."
             )
         after = before - quantity
 
@@ -186,9 +191,10 @@ def register_movement(product, user, movement_type, quantity, reason):
     # badge, nunca el número exacto.
     refresh_availability(product)
 
-    db.session.commit()
+    if commit:
+        db.session.commit()
 
-    label = "Entrada" if movement_type == MOVEMENT_ENTRY else "Salida"
+    label = MOVEMENT_LABELS.get(movement_type, movement_type)
     return True, (
         f"{label} de {quantity} registrada para {product.code}. "
         f"Stock: {before} → {after}."

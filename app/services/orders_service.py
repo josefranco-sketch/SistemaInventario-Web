@@ -12,14 +12,24 @@
 #   mínimo (para menos, se quita el producto completo).
 # - Subtotales y total se calculan automáticamente (modelo).
 #
-# REGLA ADR CRÍTICA: nada en este servicio toca el inventario.
-# Un borrador o un pedido pendiente de pago JAMÁS descuentan
-# stock; el descuento ocurre una sola vez al pagar (Sprint 5.3).
+# REGLA ADR CRÍTICA: un borrador o un pedido pendiente de pago
+# JAMÁS descuentan stock. El ÚNICO punto del sistema donde una
+# venta toca el inventario es mark_as_paid() (al final de este
+# archivo), y descuenta una sola vez por pedido.
 # ==========================================================
+from datetime import datetime
+
 from app.extensions import db
-from app.models.order import ORDER_DRAFT, ORDER_PENDING, Order, OrderItem
+from app.models.inventory import MOVEMENT_SALE
+from app.models.order import (
+    ORDER_DRAFT,
+    ORDER_PAID,
+    ORDER_PENDING,
+    Order,
+    OrderItem,
+)
 from app.models.product import STATUS_ACTIVE
-from app.services import products_service
+from app.services import inventory_service, products_service
 
 
 # ----------------------------------------------------------
@@ -202,4 +212,86 @@ def confirm_order(order, customer_name, customer_phone=""):
     return True, (
         f"Pedido {order.code} confirmado: pendiente de pago. "
         "El inventario no cambia hasta registrar el pago."
+    )
+
+
+# ----------------------------------------------------------
+# Pago: Pendiente → Pagado (Sprint 5.3)
+#
+# REGLA ADR: este es el ÚNICO lugar del sistema donde una venta
+# descuenta inventario, y ocurre UNA sola vez por pedido.
+# ----------------------------------------------------------
+
+def mark_as_paid(order, user):
+    """Marca el pedido como pagado y descuenta el inventario.
+
+    Secuencia (todo o nada):
+    1. Valida el estado: solo un pedido Pendiente de pago puede
+       pagarse. Si ya está pagado, se rechaza (evita el doble
+       descuento). Un borrador debe confirmarse primero.
+    2. Valida que TODOS los renglones tengan existencia suficiente
+       ANTES de descontar el primero: si un producto no alcanza,
+       no se descuenta nada.
+    3. Descuenta cada renglón vía el servicio de inventario con
+       movimientos tipo "venta" (usuario, fecha y motivo con el
+       código del pedido — trazabilidad completa) y recalcula la
+       disponibilidad pública de cada producto.
+    4. Cambia el estado a Pagado con fecha y quién cobró, y
+       confirma TODO en una sola transacción.
+
+    La pueden ejecutar vendedores y administradores (regla de
+    negocio: marcar pagado no es exclusivo del admin).
+    Regresa (True, mensaje) o (False, mensaje de error).
+    """
+    # --- 1. Estado ---
+    if order.status == ORDER_PAID:
+        return False, (
+            f"El pedido {order.code} ya está pagado; "
+            "el inventario no se descuenta dos veces."
+        )
+
+    if order.status != ORDER_PENDING:
+        return False, (
+            f"Solo un pedido pendiente de pago puede pagarse "
+            f"(este está {order.status_label.lower()})."
+        )
+
+    if not order.items:
+        return False, "El pedido no tiene productos."
+
+    # --- 2. Existencias suficientes para TODO el pedido ---
+    for item in order.items:
+        stock = inventory_service.get_stock(item.product)
+        if item.quantity > stock:
+            return False, (
+                f"Stock insuficiente para {item.product.code}: "
+                f"hay {stock} y el pedido pide {item.quantity}. "
+                "No se descontó nada."
+            )
+
+    # --- 3. Descuento por renglón, en una sola transacción ---
+    for item in order.items:
+        ok, message = inventory_service.register_movement(
+            product=item.product,
+            user=user,
+            movement_type=MOVEMENT_SALE,
+            quantity=item.quantity,
+            reason=f"Venta pedido {order.code}",
+            commit=False,  # se confirma todo junto al final
+        )
+        if not ok:
+            # No debería ocurrir (ya validamos stock), pero si algo
+            # falla se revierte todo: nada de descuentos a medias.
+            db.session.rollback()
+            return False, f"No se pudo descontar {item.product.code}: {message}"
+
+    # --- 4. Estado + trazabilidad, y confirmación única ---
+    order.status = ORDER_PAID
+    order.paid_at = datetime.utcnow()
+    order.paid_by_id = user.id
+
+    db.session.commit()
+    return True, (
+        f"Pedido {order.code} pagado. Inventario descontado y "
+        "disponibilidad pública actualizada."
     )
