@@ -1,0 +1,140 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Usuarios | Los Altos{% endblock %}
+{% block page_title %}Usuarios{% endblock %}
+
+{% block admin_content %}
+<!--
+===============================================================================
+LISTADO DE USUARIOS INTERNOS
+
+Administradores y vendedores del sistema. Los usuarios no se eliminan:
+se activan o inactivan (un usuario inactivo no puede iniciar sesión).
+Las contraseñas jamás se muestran; solo existe su hash en la base.
+===============================================================================
+-->
+<div class="container-xl">
+
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <p class="text-muted mb-0">{{ users|length }} usuario(s)</p>
+    <a class="btn btn-primary ms-auto" href="{{ url_for('admin.user_new') }}">
+      <i class="bi bi-person-plus me-1"></i>Nuevo usuario
+    </a>
+  </div>
+
+  {# ==========================================================
+     Filtros
+  ========================================================== #}
+  <form method="get" action="{{ url_for('admin.users_list') }}" class="admin-filter-card mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-5">
+        <label class="form-label fw-semibold" for="filter-q">Buscar</label>
+        <input type="text" id="filter-q" name="q" class="form-control"
+               placeholder="Usuario o nombre" value="{{ search }}">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold" for="filter-role">Rol</label>
+        <select id="filter-role" name="role" class="form-select">
+          <option value="">Todos</option>
+          {% for value, label in role_labels.items() %}
+            <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-secondary flex-fill">Filtrar</button>
+        <a class="btn btn-link text-decoration-none px-1" href="{{ url_for('admin.users_list') }}">Limpiar</a>
+      </div>
+    </div>
+  </form>
+
+  {# ==========================================================
+     Tabla de usuarios
+  ========================================================== #}
+  {% if users %}
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle admin-table mb-0">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+              <tr>
+                <td class="fw-semibold">
+                  {{ user.username }}
+                  {% if user.id == current_user.id %}
+                    <span class="badge text-bg-light">tú</span>
+                  {% endif %}
+                </td>
+
+                <td>{{ user.full_name }}</td>
+
+                <td>
+                  <span class="badge role-badge role-badge--{{ user.role }}">
+                    {{ role_labels.get(user.role, user.role) }}
+                  </span>
+                </td>
+
+                <td>
+                  {% if user.is_active %}
+                    <span class="badge status-badge status-badge--activo">Activo</span>
+                  {% else %}
+                    <span class="badge status-badge status-badge--inactivo">Inactivo</span>
+                  {% endif %}
+                </td>
+
+                <td class="text-end">
+                  <div class="d-flex justify-content-end flex-wrap gap-1">
+                    <a class="btn btn-sm btn-outline-secondary"
+                       href="{{ url_for('admin.user_edit', user_id=user.id) }}">
+                      Editar
+                    </a>
+
+                    {# Nadie puede desactivarse a sí mismo #}
+                    {% if user.id != current_user.id %}
+                      <form method="post" action="{{ url_for('admin.user_toggle', user_id=user.id) }}"
+                            class="d-inline"
+                            {% if user.is_active %}
+                            onsubmit="return confirm('¿Inactivar a {{ user.username }}? Ya no podrá iniciar sesión.');"
+                            {% endif %}>
+                        {{ toggle_form.csrf_token }}
+                        {% if user.is_active %}
+                          <button type="submit" class="btn btn-sm btn-outline-danger">Inactivar</button>
+                        {% else %}
+                          <button type="submit" class="btn btn-sm btn-outline-success">Activar</button>
+                        {% endif %}
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <h5 class="mb-2">No hay usuarios que coincidan</h5>
+        <p class="text-muted mb-3">Ajusta los filtros o crea un usuario nuevo.</p>
+        <a class="btn btn-primary" href="{{ url_for('admin.user_new') }}">
+          <i class="bi bi-person-plus me-1"></i>Nuevo usuario
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

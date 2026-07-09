@@ -787,3 +787,108 @@ conteos (count_low_stock recorre productos), listas y diccionarios
 (umbrales por formulario dinámico), funciones con parámetros y return
 (todo el servicio), modularidad (modelo/servicio/rutas/templates) y
 librería estándar (datetime en los movimientos).
+
+# PR #11 – Admin Users (Sprint 4.5)
+
+## Información general
+
+**Fase**
+
+4 – Panel Administrativo
+
+**Sprint**
+
+4.5 – Gestión de Usuarios
+
+**Branch**
+
+feature/admin-users
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Gestionar los usuarios internos del sistema (administradores y
+vendedores), dejándolos listos para el sistema de ventas de la Fase 5.
+Cierra la Fase 4 – Panel Administrativo.
+
+---
+
+## Trabajo realizado
+
+- Servicio `users_service.py`: listado con filtros (texto, rol), creación
+  y edición validando username único (normalizado a minúsculas: "Admin" y
+  "admin" no pueden coexistir), y activar/inactivar como única forma de
+  retiro — los usuarios no se eliminan, para que el historial de
+  inventario y las ventas futuras nunca pierdan a su autor.
+- Contraseñas SIEMPRE con hash (Werkzeug/scrypt): en creación es
+  obligatoria con confirmación (mínimo 6 caracteres); en edición es
+  opcional (en blanco conserva la actual) y jamás se muestra ni precarga.
+- Reglas de seguridad: un admin no puede desactivarse a sí mismo ni
+  cambiarse su propio rol (evita quedarse fuera del sistema); la UI ni
+  siquiera muestra el botón para el propio usuario y el servicio lo
+  rechaza aunque llegue el POST directo.
+- Formularios Flask-WTF con herencia: `UserBaseForm` → `UserCreateForm`
+  (contraseña obligatoria + EqualTo) / `UserEditForm` (opcional).
+- Rutas protegidas con @login_required + @admin_required: listado, crear,
+  editar y toggle activo (POST con CSRF y confirmación al inactivar).
+- UI según Design System: tabla con badges de rol (Administrador rosa /
+  Vendedor info) y estado, badge "tú" en el propio usuario, filtros y
+  estado vacío. Usuarios habilitado en sidebar y dashboard.
+- Usuario inactivo no puede iniciar sesión (ya lo validaba el servicio
+  de autenticación del 4.1; verificado end-to-end).
+- Queda creado el vendedor de demostración (vendedor / venta123) listo
+  para el panel de ventas del Sprint 5.1.
+
+---
+
+## Archivos principales
+
+- app/services/users_service.py (nuevo)
+- app/templates/admin/users/{list,form}.html (nuevos)
+- app/blueprints/admin/routes.py, app/blueprints/admin/forms.py (modificados)
+- app/templates/admin/{base_admin,dashboard}.html (modificados)
+- app/static/css/admin.css (modificado)
+
+---
+
+## Pruebas realizadas
+
+- Servicio: username normalizado y duplicado rechazado (aun con
+  mayúsculas), rol inválido rechazado, contraseña en blanco conserva el
+  hash, contraseña nueva lo reemplaza y el login funciona con ella,
+  cambio de rol propio rechazado, toggle propio rechazado, usuario
+  inactivo no puede autenticarse y reactivado sí.
+- HTTP con sesión real: protección sin sesión, listado con badge "tú" y
+  sin botón de toggle propio, crear vendedor, contraseñas que no
+  coinciden, username duplicado (mensaje visible), edición sin contraseña
+  precargada, ciclo inactivar → login rechazado → activar → login OK,
+  vendedor sin acceso a /admin/users, auto-toggle rechazado con aviso,
+  KPI de usuarios = 2, módulo público intacto, log sin errores.
+
+---
+
+## Pull Request
+
+**PR:** #11
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/admin-users?expand=1
+
+---
+
+## Observaciones
+
+Con este sprint la **Fase 4 – Panel Administrativo queda completada**
+(login, dashboard, productos, inventario y usuarios).
+
+Temas de la Sección 02 (rúbrica UFM): condicionales (reglas de seguridad
+del servicio), funciones con parámetros y return, diccionarios
+(ROLE_LABELS), listas y ciclos (listados y filtros), modularidad
+(servicio/formularios/rutas/templates separados) y herencia de clases en
+formularios (UserBaseForm → Create/Edit).

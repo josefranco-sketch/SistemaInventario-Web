@@ -70,7 +70,6 @@ este template solo los presenta.
     <h2 class="admin-section-title">Accesos rápidos</h2>
 
     {% set shortcuts = [
-      {"title": "Usuarios", "icon": "bi-people", "text": "Administradores y vendedores del sistema.", "soon": "Sprint 4.5"},
       {"title": "Cotizaciones", "icon": "bi-file-earmark-text", "text": "Solicitudes de cotización de clientes.", "soon": "Fase 6"},
       {"title": "Ventas", "icon": "bi-cart", "text": "Pedidos, pagos y comprobantes internos.", "soon": "Fase 5"},
     ] %}
@@ -94,6 +93,16 @@ este template solo los presenta.
           <div>
             <p class="shortcut-card__title">Inventario</p>
             <p class="shortcut-card__text">Existencias, movimientos y bajo stock.</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('admin.users_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-people"></i></span>
+          <div>
+            <p class="shortcut-card__title">Usuarios</p>
+            <p class="shortcut-card__text">Administradores y vendedores del sistema.</p>
           </div>
         </a>
       </div>

@@ -83,16 +83,15 @@ Proyecto: Sistema Integral de Gestión Comercial
             <span>Inventario</span>
           </a>
 
-          {# Los siguientes módulos se habilitan en sus sprints.
-             Mientras tanto se muestran deshabilitados para que la
-             navegación completa ya sea visible. #}
-          <span class="admin-sidebar__link admin-sidebar__link--disabled"
-                title="Disponible en el Sprint 4.5">
+          <a class="admin-sidebar__link {% if request.endpoint and request.endpoint.startswith('admin.user') %}active{% endif %}"
+             href="{{ url_for('admin.users_list') }}">
             <i class="bi bi-people"></i>
             <span>Usuarios</span>
-            <small class="admin-sidebar__soon">4.5</small>
-          </span>
+          </a>
 
+          {# Los siguientes módulos se habilitan en sus fases.
+             Mientras tanto se muestran deshabilitados para que la
+             navegación completa ya sea visible. #}
           <span class="admin-sidebar__link admin-sidebar__link--disabled"
                 title="Disponible en la Fase 6">
             <i class="bi bi-file-earmark-text"></i>

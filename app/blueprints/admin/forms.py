@@ -7,14 +7,22 @@ from wtforms import (
     DecimalField,
     HiddenField,
     IntegerField,
+    PasswordField,
     SelectField,
     StringField,
     TextAreaField,
 )
-from wtforms.validators import DataRequired, Length, NumberRange, Optional
+from wtforms.validators import (
+    DataRequired,
+    EqualTo,
+    Length,
+    NumberRange,
+    Optional,
+)
 
 from app.models.inventory import MOVEMENT_LABELS
 from app.models.product import COMMERCIAL_UNITS
+from app.models.user import ROLE_ADMIN, ROLE_SELLER
 
 
 class ProductForm(FlaskForm):
@@ -137,4 +145,75 @@ class ThresholdsForm(FlaskForm):
     """Formulario vacío: aporta el token CSRF a la pantalla de
     umbrales, cuyos campos se generan dinámicamente por
     subcategoría en el template."""
+
+
+class ConfirmActionForm(FlaskForm):
+    """Formulario vacío: aporta el token CSRF a acciones POST
+    simples (ej. activar/inactivar un usuario)."""
+
+
+class UserBaseForm(FlaskForm):
+    """Campos comunes de los formularios de usuario interno."""
+
+    username = StringField(
+        "Usuario",
+        validators=[
+            DataRequired(message="El usuario es obligatorio."),
+            Length(min=3, max=50, message="Entre 3 y 50 caracteres."),
+        ],
+    )
+
+    full_name = StringField(
+        "Nombre completo",
+        validators=[
+            DataRequired(message="El nombre es obligatorio."),
+            Length(max=120, message="Máximo 120 caracteres."),
+        ],
+    )
+
+    role = SelectField(
+        "Rol",
+        choices=[(ROLE_ADMIN, "Administrador"), (ROLE_SELLER, "Vendedor")],
+        validators=[DataRequired(message="Elige un rol.")],
+    )
+
+
+class UserCreateForm(UserBaseForm):
+    """Alta de usuario: la contraseña es obligatoria."""
+
+    password = PasswordField(
+        "Contraseña",
+        validators=[
+            DataRequired(message="La contraseña es obligatoria."),
+            Length(min=6, message="Mínimo 6 caracteres."),
+        ],
+    )
+
+    confirm_password = PasswordField(
+        "Confirmar contraseña",
+        validators=[
+            DataRequired(message="Confirma la contraseña."),
+            EqualTo("password", message="Las contraseñas no coinciden."),
+        ],
+    )
+
+
+class UserEditForm(UserBaseForm):
+    """Edición de usuario: la contraseña es opcional (en blanco
+    se conserva la actual). Nunca se muestra la existente."""
+
+    password = PasswordField(
+        "Nueva contraseña (opcional)",
+        validators=[
+            Optional(),
+            Length(min=6, message="Mínimo 6 caracteres."),
+        ],
+    )
+
+    confirm_password = PasswordField(
+        "Confirmar nueva contraseña",
+        validators=[
+            EqualTo("password", message="Las contraseñas no coinciden."),
+        ],
+    )
 
