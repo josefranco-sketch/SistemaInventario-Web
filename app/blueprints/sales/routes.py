@@ -19,6 +19,7 @@ from app.blueprints.sales.forms import ConfirmOrderForm, CsrfOnlyForm
 from app.services import (
     orders_service,
     products_service,
+    quotes_service,
     sales_service,
     users_service,
 )
@@ -320,3 +321,67 @@ def order_receipt(order_id):
         return redirect(url_for("sales.order_detail", order_id=order.id))
 
     return render_template("sales/receipt.html", order=order)
+
+
+# ----------------------------------------------------------
+# Cotizaciones recibidas (Sprint 6.2)
+#
+# Las cotizaciones que los clientes envían desde el sitio público
+# se atienden aquí: consultarlas y convertirlas en pedidos.
+# ----------------------------------------------------------
+
+@sales_bp.route("/quotes")
+@login_required
+@seller_required
+def quotes_list():
+    status = request.args.get("status", "").strip()
+    quotes = quotes_service.list_quotes(status=status)
+
+    return render_template(
+        "sales/quotes_list.html",
+        quotes=quotes,
+        selected_status=status,
+    )
+
+
+@sales_bp.route("/quotes/<int:quote_id>")
+@login_required
+@seller_required
+def quote_detail(quote_id):
+    quote = quotes_service.get_quote_or_none(quote_id)
+
+    if quote is None:
+        flash("La cotización no existe.", "danger")
+        return redirect(url_for("sales.quotes_list"))
+
+    return render_template(
+        "sales/quote_detail.html",
+        quote=quote,
+        convert_form=CsrfOnlyForm(),
+        get_minimum=products_service.get_minimum_sale,
+    )
+
+
+@sales_bp.route("/quotes/<int:quote_id>/convert", methods=["POST"])
+@login_required
+@seller_required
+def quote_convert(quote_id):
+    quote = quotes_service.get_quote_or_none(quote_id)
+
+    if quote is None:
+        flash("La cotización no existe.", "danger")
+        return redirect(url_for("sales.quotes_list"))
+
+    form = CsrfOnlyForm()
+    if not form.validate_on_submit():
+        flash("No se pudo convertir la cotización.", "danger")
+        return redirect(url_for("sales.quote_detail", quote_id=quote.id))
+
+    order, message = quotes_service.convert_to_order(quote, current_user)
+
+    if order is None:
+        flash(message, "warning")
+        return redirect(url_for("sales.quote_detail", quote_id=quote.id))
+
+    flash(message, "success")
+    return redirect(url_for("sales.order_detail", order_id=order.id))

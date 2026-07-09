@@ -68,10 +68,6 @@ este template solo los presenta.
   <section class="mt-4" aria-label="Accesos rápidos">
     <h2 class="admin-section-title">Accesos rápidos</h2>
 
-    {% set shortcuts = [
-      {"title": "Cotizaciones", "icon": "bi-file-earmark-text", "text": "Solicitudes de cotización de clientes.", "soon": "Fase 6"},
-    ] %}
-
     <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
 
       {# Accesos reales: módulos ya construidos #}
@@ -115,20 +111,15 @@ este template solo los presenta.
         </a>
       </div>
 
-      {% for item in shortcuts %}
-        <div class="col">
-          <div class="shortcut-card shortcut-card--disabled" title="Disponible en {{ item.soon }}">
-            <span class="shortcut-card__icon"><i class="bi {{ item.icon }}"></i></span>
-            <div>
-              <p class="shortcut-card__title">
-                {{ item.title }}
-                <span class="badge shortcut-card__soon">{{ item.soon }}</span>
-              </p>
-              <p class="shortcut-card__text">{{ item.text }}</p>
-            </div>
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('sales.quotes_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-file-earmark-text"></i></span>
+          <div>
+            <p class="shortcut-card__title">Cotizaciones</p>
+            <p class="shortcut-card__text">Solicitudes de cotización de clientes.</p>
           </div>
-        </div>
-      {% endfor %}
+        </a>
+      </div>
 
       {# Acceso real disponible desde ya: el sitio público #}
       <div class="col">

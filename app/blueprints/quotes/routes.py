@@ -2,6 +2,8 @@ import re
 
 from flask import redirect, render_template, request, session, url_for
 
+from app.services import quotes_service
+
 from . import quotes_bp
 
 
@@ -87,18 +89,34 @@ def quote_home():
             session.modified = True
             return redirect(url_for("quotes.quote_home"))
 
+        # Desde el Sprint 6.2 la cotización se guarda en base de datos
+        # para que un vendedor la atienda (no maneja pagos ni toca
+        # inventario — regla ADR).
+        saved_quote = quotes_service.create_quote_from_session(quote)
         session.pop("quote", None)
+
+        if saved_quote is not None:
+            success_message = (
+                f"✅ Su cotización {saved_quote.code} fue enviada "
+                "correctamente. Un vendedor se comunicará con usted."
+            )
+        else:
+            success_message = (
+                "Los productos de su cotización ya no están disponibles; "
+                "por favor arme una nueva desde el catálogo."
+            )
+
         return render_template(
             "quotes/index.html",
             quote={
-                "code": "COT-0001",
+                "code": saved_quote.code if saved_quote else "—",
                 "customer_name": "",
                 "customer_phone": "",
                 "customer_email": "",
                 "items": [],
                 "subtotal": 0.0,
                 "total": 0.0,
-                "success_message": "✅ Su cotización ha sido preparada correctamente.",
+                "success_message": success_message,
             },
         )
 

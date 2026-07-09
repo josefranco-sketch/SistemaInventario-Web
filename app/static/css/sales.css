@@ -302,3 +302,13 @@
         padding: 0;
     }
 }
+
+/* Badges de estado de cotización (Sprint 6.2) */
+.quote-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.quote-badge--pendiente  { background-color: var(--la-warning-soft); color: #B45309; }
+.quote-badge--convertida { background-color: var(--la-success-soft); color: var(--la-success); }
