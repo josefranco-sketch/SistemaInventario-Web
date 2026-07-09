@@ -90,11 +90,14 @@
                          Volver al catálogo
                         </a>
 
+                       {# La cotización arranca con la venta mínima de la
+                          categoría (el cliente puede cotizar esa cantidad o más) #}
                        <a href="{{ url_for(
                             'quotes.quote_home',
                             product_code=product.code,
                             product_name=product.name,
-                            product_price=product.price
+                            product_price=product.price,
+                            quantity=product.minimum_sale
                         ) }}" class="btn btn-primary">
                             Agregar a cotización
                         </a>

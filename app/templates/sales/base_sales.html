@@ -73,6 +73,12 @@ Proyecto: Sistema Integral de Gestión Comercial
               <i class="bi bi-receipt me-1"></i>Pedidos
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link sales-navbar__link {% if request.endpoint in ('sales.quotes_list', 'sales.quote_detail') %}active{% endif %}"
+               href="{{ url_for('sales.quotes_list') }}">
+              <i class="bi bi-file-earmark-text me-1"></i>Cotizaciones
+            </a>
+          </li>
           {% if current_user.is_admin() %}
             <li class="nav-item">
               <a class="nav-link sales-navbar__link" href="{{ url_for('admin.dashboard') }}">

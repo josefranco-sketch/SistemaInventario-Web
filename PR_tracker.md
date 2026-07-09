@@ -1471,3 +1471,122 @@ diccionarios (vista pública del producto), listas y ciclos (catálogo y
 filtros), condicionales (visibilidad por estado), modularidad (servicio
 de catálogo que compone productos e inventario indirectamente vía
 disponibilidad).
+
+# PR #17 – Integration: Quote → Order (Sprint 6.2)
+
+## Información general
+
+**Fase**
+
+6 – Integración
+
+**Sprint**
+
+6.2 – Integración Cotización → Pedido
+
+**Branch**
+
+feature/integration-quote-to-order
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Que las cotizaciones del sitio público lleguen a los vendedores y puedan
+convertirse en pedidos internos Pendientes de pago, manteniendo
+cantidades, precios y las reglas de venta mínima.
+
+---
+
+## Trabajo realizado
+
+- Modelos nuevos `Quote`/`QuoteItem` (previstos en la Arquitectura
+  Técnica): la cotización que el cliente arma en su sesión ahora SE
+  PERSISTE al enviarla, con código legible (COT-0001), datos del
+  cliente, renglones enlazados a productos existentes (fuente única) y
+  el precio congelado que el cliente vio. Estados: Pendiente /
+  Convertida en pedido, con referencia al pedido generado
+  (trazabilidad bidireccional).
+- Servicio `quotes_service.py`: persistencia desde la sesión (los
+  renglones cuyo producto ya no existe se omiten), listado por estado,
+  conteo de pendientes para el dashboard y la conversión a pedido.
+- Conversión Cotización → Pedido: nace directamente Pendiente de pago a
+  nombre del vendedor que la atiende, reutiliza los productos
+  existentes (sin duplicar), mantiene los precios cotizados, y valida
+  la venta mínima por categoría: las cantidades por debajo del mínimo
+  se AJUSTAN HACIA ARRIBA con un mensaje que detalla cada ajuste
+  (decisión: el cliente público puede cotizar menos, pero no se vende
+  menos). Si algún producto ya no está activo, la conversión completa
+  se rechaza. NO descuenta inventario (regla ADR).
+- Bandeja de cotizaciones en el panel de ventas: listado con filtro por
+  estado y detalle con datos del cliente, mínimos por renglón (avisando
+  qué se ajustará) y botón de conversión con confirmación.
+- Sitio público: el enlace "Agregar a cotización" del detalle ahora
+  arranca con la VENTA MÍNIMA de la categoría (antes cotizaba 1), y al
+  enviar la cotización el cliente recibe confirmación con su código de
+  seguimiento (el template no mostraba el mensaje de éxito — corregido).
+- Dashboard: el KPI de cotizaciones pendientes es REAL — con esto TODOS
+  los indicadores son reales y el aviso de datos de demostración
+  desapareció. Acceso rápido de Cotizaciones habilitado.
+
+---
+
+## Archivos principales
+
+- app/models/quote.py, app/services/quotes_service.py (nuevos)
+- app/templates/sales/{quotes_list,quote_detail}.html (nuevos)
+- app/blueprints/quotes/routes.py (persistencia al enviar)
+- app/blueprints/sales/routes.py (bandeja + conversión)
+- app/templates/public/product_detail.html (cotiza con venta mínima)
+- app/templates/quotes/index.html (mensaje de confirmación)
+- app/templates/sales/base_sales.html, app/templates/admin/dashboard.html
+- app/services/dashboard_service.py, app/models/__init__.py
+- app/static/css/sales.css
+
+---
+
+## Pruebas realizadas
+
+- Servicio: persistencia desde sesión con producto inexistente omitido,
+  código COT generado, total correcto; conversión con ajuste de mínimos
+  (1 → 3 informado), precios cotizados mantenidos, pedido Pendiente,
+  cliente heredado; trazabilidad quote↔order; re-conversión rechazada;
+  producto inactivo bloquea la conversión; inventario intacto.
+- HTTP end-to-end: el detalle público cotiza con quantity=venta mínima;
+  cliente arma cotización (incluido tulipán x1 forzado) y la envía con
+  confirmación y código; el vendedor la ve en su bandeja, el detalle
+  avisa "se ajustará a 3", convierte y aterriza en el pedido Pendiente
+  de pago a nombre de Ana Pérez; la cotización queda Convertida con
+  enlace al pedido; inventario sin cambios; dashboard sin aviso de demo
+  y con todos los KPIs reales; módulo público intacto; log limpio.
+- COT-0002 (convertida) y el pedido PED-0009 (pendiente) quedan como
+  datos de demostración del flujo completo.
+
+---
+
+## Pull Request
+
+**PR:** #17
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/integration-quote-to-order?expand=1
+
+---
+
+## Observaciones
+
+Decisión registrada: al convertir, las cantidades bajo el mínimo de
+categoría se ajustan hacia arriba (con aviso detallado) en lugar de
+rechazar la conversión — el pedido nace Pendiente (no editable) y el
+vendedor no podría corregirlo después.
+
+Temas de la Sección 02 (rúbrica UFM): condicionales (validaciones de
+conversión), ciclos for (persistencia y conversión por renglón), listas
+y diccionarios (estado de sesión → modelos), funciones con parámetros y
+return, modularidad (quotes_service compone products/orders) y librería
+estándar (datetime, decimal).

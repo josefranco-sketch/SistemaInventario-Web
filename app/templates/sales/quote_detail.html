@@ -1,0 +1,122 @@
+{% extends "sales/base_sales.html" %}
+
+{% block title %}Cotización {{ quote.code }} | Los Altos{% endblock %}
+
+{% block sales_content %}
+<!--
+===============================================================================
+DETALLE DE COTIZACIÓN
+
+Muestra lo que el cliente cotizó (precios congelados al momento de
+cotizar) y permite convertirla en pedido Pendiente de pago. Al convertir,
+las cantidades por debajo de la venta mínima de su categoría se ajustan
+hacia arriba (se avisa el detalle). Convertir NO descuenta inventario.
+===============================================================================
+-->
+<div class="container-xl">
+
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="sales-title">Cotización {{ quote.code }}</h1>
+      <p class="text-muted mb-0">
+        <span class="badge quote-badge quote-badge--{{ quote.status }}">{{ quote.status_label }}</span>
+        · recibida el {{ quote.created_at.strftime("%d/%m/%Y %H:%M") }}
+      </p>
+    </div>
+    <a class="btn btn-outline-secondary ms-auto" href="{{ url_for('sales.quotes_list') }}">
+      <i class="bi bi-arrow-left me-1"></i>Cotizaciones
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="table-responsive">
+          <table class="table align-middle admin-table mb-0">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="text-end">Precio cotizado</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-center">Mínimo</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in quote.items %}
+                {% set minimum = get_minimum(item.product) %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ item.product.name }}</div>
+                    <small class="text-muted">
+                      {{ item.product.code }} · {{ item.product.commercial_presentation }}
+                      {% if item.product.status != "activo" %}
+                        · <span class="text-danger fw-semibold">ya no está activo</span>
+                      {% endif %}
+                    </small>
+                  </td>
+                  <td class="text-end">Q {{ "%.2f"|format(item.unit_price) }}</td>
+                  <td class="text-center">
+                    {{ item.quantity }}
+                    {% if item.quantity < minimum %}
+                      <div><small class="text-warning-emphasis">se ajustará a {{ minimum }}</small></div>
+                    {% endif %}
+                  </td>
+                  <td class="text-center text-muted">{{ minimum }}</td>
+                  <td class="text-end fw-semibold">Q {{ "%.2f"|format(item.subtotal) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="4" class="text-end">Total cotizado</th>
+                <th class="text-end fs-5">Q {{ "%.2f"|format(quote.total) }}</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3">Cliente</h5>
+
+          <p class="mb-1"><span class="text-muted">Nombre:</span>
+            <strong>{{ quote.customer_name }}</strong></p>
+          <p class="mb-1"><span class="text-muted">Teléfono:</span>
+            {{ quote.customer_phone }}</p>
+          <p class="mb-0"><span class="text-muted">Correo:</span>
+            {{ quote.customer_email or "—" }}</p>
+
+          <hr>
+
+          {% if quote.status == "pendiente" %}
+            <form method="post" action="{{ url_for('sales.quote_convert', quote_id=quote.id) }}"
+                  onsubmit="return confirm('¿Convertir {{ quote.code }} en pedido? Quedará pendiente de pago; el inventario no cambia.');">
+              {{ convert_form.csrf_token }}
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-cart-plus me-1"></i>Convertir en pedido
+              </button>
+            </form>
+
+            <p class="text-muted mt-3 mb-0" style="font-size: 0.85rem;">
+              <i class="bi bi-info-circle me-1"></i>El pedido nace Pendiente de
+              pago con los precios cotizados. Las cantidades bajo la venta
+              mínima se ajustan hacia arriba. No se descuenta inventario.
+            </p>
+          {% else %}
+            <p class="mb-1"><span class="text-muted">Pedido generado:</span></p>
+            <a class="btn btn-outline-secondary w-100"
+               href="{{ url_for('sales.order_detail', order_id=quote.order_id) }}">
+              Ver pedido {{ quote.order.code }}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
