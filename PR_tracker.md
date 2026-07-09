@@ -1698,3 +1698,103 @@ funciones propias con parámetros y return (check, build_order, cleanup),
 listas de tuplas para acumular resultados, ciclos for para el resumen,
 condicionales para cada regla, entrada/salida por consola con print y
 modularidad (importa y compone 4 servicios del sistema).
+
+# PR #19 – Integration: End-to-End Flow (Sprint 6.4)
+
+## Información general
+
+**Fase**
+
+6 – Integración
+
+**Sprint**
+
+6.4 – Flujo End-to-End Completo
+
+**Branch**
+
+feature/integration-end-to-end
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Validar el recorrido completo del sistema (los 13 pasos del flujo
+esperado) y hacer un barrido de regresión de todos los módulos. Cierra
+la Fase 6 – Integración.
+
+---
+
+## Trabajo realizado
+
+Ejecución del flujo completo contra la aplicación corriendo, por HTTP,
+con un producto creado desde cero (E2E-01, Girasol Gigante):
+
+| # | Paso | Resultado |
+|---|------|-----------|
+| 1 | Administrador inicia sesión | ✅ redirige a /admin/ |
+| 2 | Administrador crea producto (con imagen subida) | ✅ |
+| 3 | Administrador registra inventario (entrada 8) | ✅ |
+| 4 | Producto aparece en catálogo público | ✅ Disponible |
+| 5 | Cliente ve el detalle | ✅ precio/presentación, sin stock exacto |
+| 6 | Cliente crea cotización (arranca en mínimo 3 ramos) | ✅ COT generada con código |
+| 7 | Vendedor convierte la cotización | ✅ pedido creado |
+| 8 | Pedido queda Pendiente de pago | ✅ |
+| 9 | Inventario NO cambia | ✅ stock sigue en 8 |
+| 10 | Vendedor marca el pedido como pagado | ✅ |
+| 11 | Inventario se descuenta | ✅ 8 → 5 (una sola vez) |
+| 12 | Disponibilidad pública se actualiza | ✅ catálogo muestra Baja disponibilidad (5 = umbral) |
+| 13 | Se genera comprobante interno | ✅ con leyenda de no-factura y total Q126.00 |
+
+Errores encontrados: NINGUNO — el flujo corrió limpio de punta a punta
+sin correcciones.
+
+Barrido de regresión (28 rutas):
+- Módulo público sin sesión: 6 rutas → 200.
+- Rutas internas sin sesión: 7 rutas → 302 al login (protegidas).
+- Sesión admin: 11 rutas → 200 (dashboard, productos, inventario,
+  movimientos, umbrales, usuarios, ventas, pedidos, cotizaciones).
+- Sesión vendedor: 4 rutas → 200.
+- Log de Flask sin errores.
+
+Los datos de la corrida E2E se limpiaron al terminar (producto, imagen,
+movimientos, pedido y cotización); la base quedó con los datos reales
+del usuario.
+
+---
+
+## Archivos principales
+
+- PR_tracker.md (evidencia de la validación — sprint sin cambios de
+  código: el flujo corrió sin encontrar errores que corregir)
+
+---
+
+## Pull Request
+
+**PR:** #19
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/integration-end-to-end?expand=1
+
+---
+
+## Observaciones
+
+Con este sprint la **Fase 6 – Integración queda completada**: el sistema
+opera como un todo — Administrador → Productos → Catálogo → Cotización →
+Pedido → Pago → Inventario → Disponibilidad Pública → Comprobante.
+
+La secuencia de los 13 pasos es la receta recomendada para la DEMO de la
+presentación final (Fase 8.3): contarla con un producto nuevo en vivo
+muestra todas las reglas de negocio del ADR en ~5 minutos.
+
+Reglas verificadas en la corrida: producto único (fuente única), stock
+exacto oculto al público, cotización y pendiente sin descuento,
+descuento único al pagar con historial, disponibilidad derivada del
+inventario, comprobante sin valor fiscal.
