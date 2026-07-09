@@ -45,16 +45,47 @@ def _load_real_app():
 def _build_diagnostic_app(startup_error):
     """Fallback WSGI puro (sin dependencias) que muestra el error
     de arranque. Diagnóstico temporal; se retirará al cerrar el deploy."""
-    lines = ["DIAGNOSTICO TEMPORAL DE ARRANQUE", "=" * 40, startup_error, ""]
+    lines = ["DIAGNOSTICO TEMPORAL DE ARRANQUE v2", "=" * 40, startup_error, ""]
     try:
         lines.append("python: " + sys.version)
         lines.append("ROOT = " + ROOT)
-        lines.append("contenido de ROOT: " + ", ".join(sorted(os.listdir(ROOT))))
-        api_dir = os.path.dirname(os.path.abspath(__file__))
-        lines.append("contenido de api/: " + ", ".join(sorted(os.listdir(api_dir))))
         lines.append("sys.path: " + " | ".join(sys.path))
+        lines.append("")
+
+        # Árbol completo de app/ tal como quedó en el bundle
+        lines.append("--- árbol de app/ en el bundle ---")
+        app_dir = os.path.join(ROOT, "app")
+        if os.path.isdir(app_dir):
+            count = 0
+            for dirpath, dirnames, filenames in os.walk(app_dir):
+                dirnames.sort()
+                rel = os.path.relpath(dirpath, ROOT)
+                lines.append(f"{rel}/: " + ", ".join(sorted(filenames)))
+                count += 1
+                if count > 60:
+                    lines.append("(árbol truncado)")
+                    break
+        else:
+            lines.append("¡app/ NO es un directorio en el bundle!")
+
+        lines.append("")
+        lines.append("--- resolución de imports ---")
+        import importlib.util
+        for name in ["app", "app.extensions", "app.blueprints",
+                     "app.blueprints.public", "app.models", "app.services"]:
+            try:
+                spec = importlib.util.find_spec(name)
+                origin = spec.origin if spec else "None"
+                lines.append(f"find_spec('{name}') -> {origin}")
+            except Exception as spec_error:  # noqa: BLE001
+                lines.append(f"find_spec('{name}') ERROR: {spec_error}")
+
+        lines.append("")
+        lines.append("--- otros ---")
+        lines.append("deploy/ existe: " + str(os.path.isdir(os.path.join(ROOT, "deploy"))))
+        lines.append("templates/ existe: " + str(os.path.isdir(os.path.join(ROOT, "app", "templates"))))
     except Exception as info_error:  # noqa: BLE001
-        lines.append(f"(no se pudo listar: {info_error})")
+        lines.append(f"(no se pudo inspeccionar: {info_error})")
 
     body = "\n".join(lines).encode("utf-8")
 

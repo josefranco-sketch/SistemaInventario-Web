@@ -8,7 +8,7 @@
 # ==========================================================
 from flask import abort, render_template, request
 
-from app.blueprints.public import public_bp
+from app.blueprints.site import public_bp
 from app.services import catalog_service
 
 
@@ -16,7 +16,7 @@ from app.services import catalog_service
 # Cuando el usuario entra a "/", Flask renderiza el Home.
 @public_bp.route("/")
 def home():
-    return render_template("public/home.html")
+    return render_template("site/home.html")
 
 
 # Página del Catálogo
@@ -45,7 +45,7 @@ def catalog():
         visible_subcategories = subcategories[selected_category]
 
     return render_template(
-        "public/catalog.html",
+        "site/catalog.html",
         products=products,
         categories=categories,
         subcategories=visible_subcategories,
@@ -66,7 +66,7 @@ def product_detail(product_code):
         abort(404)
 
     return render_template(
-        "public/product_detail.html",
+        "site/product_detail.html",
         product=product,
         return_url=request.args.get("next"),
     )

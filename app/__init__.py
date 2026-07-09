@@ -4,7 +4,7 @@ from app.extensions import db, login_manager
 from app.models.user import User # Modelo de usuarios internos (admin/vendedor)
 
 # Importamos los Blueprints de cada módulo del sistema
-from app.blueprints.public import public_bp
+from app.blueprints.site import public_bp # (carpeta renombrada: Vercel excluye directorios llamados 'public')
 from app.blueprints.admin import admin_bp
 from app.blueprints.auth import auth_bp
 from app.blueprints.quotes import quotes_bp
