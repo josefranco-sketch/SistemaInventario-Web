@@ -443,3 +443,6 @@ a.shortcut-card:hover {
 
 .role-badge--admin    { background-color: var(--la-brand-soft); color: var(--la-brand-active); }
 .role-badge--vendedor { background-color: var(--la-info-soft); color: var(--la-info); }
+
+/* Movimiento tipo venta (generado por el sistema al pagar un pedido) */
+.movement-badge--venta { background-color: var(--la-info-soft); color: var(--la-info); }

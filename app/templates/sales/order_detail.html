@@ -82,10 +82,34 @@ el Sprint 5.3 y el comprobante imprimible en el 5.4.
 
           {% if order.status == "pendiente" %}
             <hr>
+
+            {# ==========================================================
+               Registrar pago (Sprint 5.3)
+               Único punto donde la venta descuenta inventario.
+            ========================================================== #}
+            <form method="post" action="{{ url_for('sales.order_pay', order_id=order.id) }}"
+                  onsubmit="return confirm('¿Registrar el pago de {{ order.code }} por Q {{ "%.2f"|format(order.total) }}? El inventario se descontará.');">
+              {{ pay_form.csrf_token }}
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-cash-coin me-1"></i>Registrar pago
+              </button>
+            </form>
+
+            <p class="text-muted mt-3 mb-0" style="font-size: 0.85rem;">
+              <i class="bi bi-info-circle me-1"></i>Pedido pendiente: el
+              inventario no ha cambiado. Al registrar el pago se validan las
+              existencias y se descuenta una sola vez.
+            </p>
+          {% elif order.status == "pagado" %}
+            <hr>
+            <p class="mb-1"><span class="text-muted">Pagado el:</span>
+              <strong>{{ order.paid_at.strftime("%d/%m/%Y %H:%M") if order.paid_at else "—" }}</strong></p>
+            <p class="mb-2"><span class="text-muted">Cobrado por:</span>
+              {{ order.paid_by.full_name if order.paid_by else "—" }}</p>
             <p class="text-muted mb-0" style="font-size: 0.85rem;">
-              <i class="bi bi-info-circle me-1"></i>Pedido pendiente de pago:
-              el inventario no ha cambiado. El registro del pago se habilita
-              en el Sprint 5.3.
+              <i class="bi bi-check-circle me-1"></i>Inventario descontado y
+              disponibilidad pública actualizada. El movimiento quedó en el
+              historial de inventario.
             </p>
           {% endif %}
         </div>

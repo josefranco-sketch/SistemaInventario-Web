@@ -17,15 +17,22 @@ from datetime import datetime
 
 from app.extensions import db
 
-# Tipos de movimiento (la Fase 5 agregará el tipo "venta")
+# Tipos de movimiento.
+# "venta" solo lo genera el sistema al pagar un pedido (Sprint 5.3);
+# nunca se registra a mano desde el formulario de inventario.
 MOVEMENT_ENTRY = "entrada"
 MOVEMENT_EXIT = "salida"
-MOVEMENT_TYPES = [MOVEMENT_ENTRY, MOVEMENT_EXIT]
+MOVEMENT_SALE = "venta"
+MOVEMENT_TYPES = [MOVEMENT_ENTRY, MOVEMENT_EXIT, MOVEMENT_SALE]
 
 MOVEMENT_LABELS = {
     MOVEMENT_ENTRY: "Entrada",
     MOVEMENT_EXIT: "Salida",
+    MOVEMENT_SALE: "Venta",
 }
+
+# Tipos que el administrador puede registrar manualmente
+MANUAL_MOVEMENT_TYPES = [MOVEMENT_ENTRY, MOVEMENT_EXIT]
 
 
 class Inventory(db.Model):

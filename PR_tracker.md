@@ -1125,3 +1125,125 @@ render de tablas), listas (order.items), diccionarios (etiquetas de
 estado), funciones con parámetros y return (todo el servicio), modularidad
 (modelo/servicio/formularios/rutas/templates) y librería estándar
 (decimal para dinero, datetime).
+
+# PR #14 – Sales Payment (Sprint 5.3)
+
+## Información general
+
+**Fase**
+
+5 – Sistema de Ventas
+
+**Sprint**
+
+5.3 – Pago y Descuento de Inventario
+
+**Branch**
+
+feature/sales-payment
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Implementar la confirmación de pago con el descuento correcto de
+inventario: una sola vez, validando existencias, con trazabilidad
+completa y disponibilidad pública actualizada. El sprint más crítico del
+ADR.
+
+---
+
+## Trabajo realizado
+
+- `mark_as_paid()` en orders_service — el ÚNICO punto del sistema donde
+  una venta descuenta inventario. Secuencia todo-o-nada:
+  1. Estado: solo un pedido Pendiente puede pagarse; pagado se rechaza
+     (sin doble descuento); borrador y cancelado se rechazan.
+  2. Existencias: se validan TODOS los renglones antes de descontar el
+     primero; si un producto no alcanza, no se descuenta nada.
+  3. Descuento por renglón vía inventory_service con el nuevo tipo de
+     movimiento "venta" (usuario, fecha, motivo "Venta pedido PED-XXXX"
+     — trazabilidad completa) y disponibilidad pública recalculada.
+  4. Estado Pagado + fecha de pago + quién cobró, confirmado en UNA sola
+     transacción (register_movement ganó el parámetro commit=False para
+     que el pago de varios renglones sea atómico).
+- Nuevo tipo de movimiento "venta": solo lo genera el sistema al pagar;
+  el formulario manual de inventario quedó restringido a entrada/salida
+  (constante MANUAL_MOVEMENT_TYPES) y el historial lo muestra con su
+  propio badge.
+- Campos de trazabilidad en Order: paid_at y paid_by (con foreign_keys
+  explícitos por la doble relación hacia users).
+- Ruta POST /sales/orders/<id>/pay protegida (CSRF): el vendedor cobra
+  sus pedidos y el administrador puede cobrar cualquiera (regla de
+  negocio: marcar pagado no es exclusivo del admin).
+- Detalle del pedido: botón "Registrar pago" con confirmación y monto
+  (solo pendientes); pagados muestran fecha, quién cobró y aviso de
+  inventario descontado.
+- Script `migrate_payment_fields.py` (idempotente) para agregar las
+  columnas nuevas a bases locales creadas antes de este sprint
+  (create_all no altera tablas existentes).
+
+---
+
+## Archivos principales
+
+- app/services/orders_service.py (mark_as_paid)
+- app/services/inventory_service.py (commit=False, tipo venta)
+- app/models/order.py (paid_at, paid_by), app/models/inventory.py (venta)
+- app/blueprints/sales/routes.py (ruta de pago)
+- app/blueprints/admin/forms.py (formulario manual sin "venta")
+- app/templates/sales/order_detail.html, app/static/css/admin.css
+- migrate_payment_fields.py (nuevo)
+
+---
+
+## Pruebas realizadas
+
+- Borrador y cancelado no se pueden pagar; pendiente sí.
+- Pago correcto: stock descontado exactamente una vez, movimiento
+  "venta" con usuario/fecha/motivo en el historial, paid_at y paid_by
+  registrados, disponibilidad pública recalculada (tulipán pasó a Baja
+  disponibilidad al quedar en el umbral).
+- Doble pago rechazado con mensaje claro y stock intacto (verificado a
+  nivel servicio y por HTTP).
+- Todo-o-nada: pedido con un renglón sin stock suficiente → rechazo
+  ANTES de descontar nada; los demás renglones quedaron intactos y el
+  pedido siguió pendiente.
+- El vendedor (rol vendedor) ejecutó los pagos — regla de negocio
+  verificada.
+- Formulario manual de inventario solo ofrece entrada/salida ("venta"
+  no se puede registrar a mano).
+- Historial de inventario en el panel admin muestra las ventas con su
+  badge y el código del pedido.
+- Módulo público intacto; log sin errores.
+- Los pedidos PED-0001 y PED-0003 quedaron pendientes en la base local
+  para que el usuario pruebe el flujo completo él mismo.
+
+---
+
+## Pull Request
+
+**PR:** #14
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/sales-payment?expand=1
+
+---
+
+## Observaciones
+
+IMPORTANTE para probar localmente: correr una vez
+`python migrate_payment_fields.py` antes de `python run.py` (agrega las
+columnas de pago a la base existente; es seguro repetirlo).
+
+Temas de la Sección 02 (rúbrica UFM): condicionales (validaciones de
+estado y existencias), ciclos for (validación y descuento por renglón),
+funciones con parámetros y return, diccionarios (etiquetas de
+movimiento), modularidad (orders_service reutiliza inventory_service) y
+librería estándar (datetime para la fecha de pago, sqlalchemy.text en la
+migración).

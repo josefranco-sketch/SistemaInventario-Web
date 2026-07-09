@@ -20,7 +20,7 @@ from wtforms.validators import (
     Optional,
 )
 
-from app.models.inventory import MOVEMENT_LABELS
+from app.models.inventory import MANUAL_MOVEMENT_TYPES, MOVEMENT_LABELS
 from app.models.product import COMMERCIAL_UNITS
 from app.models.user import ROLE_ADMIN, ROLE_SELLER
 
@@ -120,7 +120,9 @@ class MovementForm(FlaskForm):
 
     movement_type = SelectField(
         "Tipo de movimiento",
-        choices=[(value, label) for value, label in MOVEMENT_LABELS.items()],
+        # Solo entrada/salida: el tipo "venta" lo genera el sistema
+        # al pagar un pedido, nunca se registra a mano.
+        choices=[(value, MOVEMENT_LABELS[value]) for value in MANUAL_MOVEMENT_TYPES],
         validators=[DataRequired(message="Elige el tipo de movimiento.")],
     )
 
