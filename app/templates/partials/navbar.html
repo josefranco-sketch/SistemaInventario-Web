@@ -90,6 +90,11 @@ Proyecto: Sistema Integral de Gestión Comercial
                        href="{{ url_for('admin.dashboard') }}">
                         Panel
                     </a>
+                {% else %}
+                    <a class="btn btn-outline-secondary btn-sm mt-3 mt-md-0 ms-md-3"
+                       href="{{ url_for('sales.panel') }}">
+                        Panel de ventas
+                    </a>
                 {% endif %}
                 <a class="btn btn-outline-secondary btn-sm mt-3 mt-md-0 ms-md-2"
                    href="{{ url_for('auth.logout') }}">

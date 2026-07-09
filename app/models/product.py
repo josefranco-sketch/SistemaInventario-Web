@@ -42,6 +42,14 @@ AVAILABILITY_LABELS = {
 # Presentaciones comerciales con las que se vende
 COMMERCIAL_UNITS = ["Caja", "Display", "Unidad", "Ramo"]
 
+# Plurales en español para mostrar cantidades ("3 unidades", "2 cajas")
+UNIT_PLURALS = {
+    "Caja": "cajas",
+    "Display": "displays",
+    "Unidad": "unidades",
+    "Ramo": "ramos",
+}
+
 
 class Product(db.Model):
     __tablename__ = "products"

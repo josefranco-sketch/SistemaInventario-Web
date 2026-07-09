@@ -29,9 +29,8 @@ def _redirect_after_login(user):
     if user.is_admin():
         return redirect(url_for("admin.dashboard"))
 
-    # Los vendedores tendrán su propio panel en la Fase 5 (Ventas).
-    # Mientras tanto, los enviamos al inicio del sitio.
-    return redirect(url_for("public.home"))
+    # Los vendedores van a su panel de ventas (Fase 5)
+    return redirect(url_for("sales.panel"))
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])

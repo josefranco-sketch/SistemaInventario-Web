@@ -25,3 +25,24 @@ def admin_required(view_func):
         return view_func(*args, **kwargs)
 
     return wrapper
+
+
+def seller_required(view_func):
+    """Permite el acceso al módulo de ventas: vendedores y también
+    administradores (el admin puede operar ventas). El cliente
+    público nunca entra (no tiene sesión).
+    """
+
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash("Inicia sesión para acceder al panel interno.", "warning")
+            return redirect(url_for("auth.login"))
+
+        if current_user.role not in ("admin", "vendedor"):
+            flash("No tienes permisos para entrar a esta sección.", "warning")
+            return redirect(url_for("public.home"))
+
+        return view_func(*args, **kwargs)
+
+    return wrapper

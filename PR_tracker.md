@@ -892,3 +892,114 @@ del servicio), funciones con parámetros y return, diccionarios
 (ROLE_LABELS), listas y ciclos (listados y filtros), modularidad
 (servicio/formularios/rutas/templates separados) y herencia de clases en
 formularios (UserBaseForm → Create/Edit).
+
+# PR #12 – Sales Panel (Sprint 5.1)
+
+## Información general
+
+**Fase**
+
+5 – Sistema de Ventas
+
+**Sprint**
+
+5.1 – Panel de Vendedores y Buscador de Productos
+
+**Branch**
+
+feature/sales-panel
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Crear la entrada operativa para vendedores: panel propio con buscador de
+productos sobre la fuente única, respetando roles. Inicia la Fase 5.
+
+---
+
+## Trabajo realizado
+
+- Blueprint `sales` activado con prefijo /sales y sus rutas.
+- Decorador `seller_required`: acceso para vendedores y administradores;
+  el cliente público jamás entra (sin sesión → login).
+- Servicio `sales_service.py`: búsqueda de productos para venta que
+  reutiliza el buscador de productos (código, nombre, descripción) y el
+  servicio de inventario — solo productos ACTIVOS (inactivos y archivados
+  no se venden), con stock exacto (el vendedor sí lo ve, regla ADR),
+  venta mínima por categoría con etiqueta legible ("1 caja",
+  "3 unidades", "3 ramos") y disponibilidad.
+- Layout propio del vendedor (`base_sales.html`): barra superior carbón
+  con sección activa en rosa (misma identidad del panel interno),
+  usuario/rol/salir, responsive con menú colapsable; enlace "Panel admin"
+  visible solo para administradores. Pedidos marcado como 5.2.
+- Vista del panel: buscador prominente (texto + categoría), estado
+  inicial que invita a buscar, tabla de resultados con miniatura, código,
+  presentación comercial, precio, venta mínima, stock y disponibilidad,
+  estado "sin resultados" y nota de que el stock es información interna.
+- Nuevo `sales.css` (CSS por área); reutiliza los componentes internos
+  compartidos de admin.css (badges, tablas, filtros).
+- Login del vendedor ahora redirige a su panel (/sales/); navbar pública
+  muestra "Panel de ventas" al vendedor con sesión; sidebar admin habilita
+  "Ventas".
+- Corrección durante desarrollo: pluralización correcta en español de la
+  venta mínima (diccionario UNIT_PLURALS en el modelo, etiqueta construida
+  en el servicio — no en el template).
+
+---
+
+## Archivos principales
+
+- app/blueprints/sales/routes.py, app/services/sales_service.py (nuevos)
+- app/templates/sales/{base_sales,panel}.html (nuevos)
+- app/static/css/sales.css (nuevo)
+- app/blueprints/sales/__init__.py (prefijo + rutas)
+- app/blueprints/auth/decorators.py (seller_required)
+- app/blueprints/auth/routes.py (redirect del vendedor a su panel)
+- app/models/product.py (UNIT_PLURALS)
+- app/templates/partials/navbar.html, app/templates/admin/base_admin.html
+
+---
+
+## Pruebas realizadas
+
+- Público sin sesión → redirigido al login (no accede).
+- Login vendedor → redirige a /sales/; badge de rol visible.
+- Panel inicial invita a buscar (no vuelca todo el catálogo).
+- Búsqueda por código (insensible a mayúsculas), por descripción y
+  filtro por categoría, todas contra la base de datos real.
+- Solo productos activos: inactivo y archivado desaparecen del buscador
+  (verificado a nivel de servicio en ambos estados).
+- Stock exacto y venta mínima visibles para el vendedor.
+- Admin accede a /sales/ y ve el enlace de regreso a su panel; sidebar
+  admin marca Ventas activo.
+- Regresión: vendedor sigue sin poder entrar a /admin/; módulo público
+  intacto; sales.css servido; log sin errores.
+
+---
+
+## Pull Request
+
+**PR:** #12
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/sales-panel?expand=1
+
+---
+
+## Observaciones
+
+Decisión de diseño menor: el vendedor usa barra superior (no sidebar)
+porque tiene pocas secciones y así gana espacio de trabajo en móvil; la
+identidad visual (carbón + activo rosa) es la misma del panel interno.
+
+Temas de la Sección 02 (rúbrica UFM): condicionales (roles, estados del
+buscador), ciclos for (resultados), listas y diccionarios (resultados del
+servicio como lista de diccionarios, UNIT_PLURALS), funciones con
+parámetros y return, modularidad (blueprint + servicio que reutiliza
+otros dos servicios vía import).
