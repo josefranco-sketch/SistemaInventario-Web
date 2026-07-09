@@ -1,0 +1,174 @@
+{% extends "sales/base_sales.html" %}
+
+{% block title %}Pedido actual | Los Altos{% endblock %}
+
+{% block sales_content %}
+<!--
+===============================================================================
+PEDIDO ACTUAL DEL VENDEDOR (borrador)
+
+El vendedor arma aquí su pedido: cantidades con + / − (respetando la
+venta mínima por categoría), quitar productos, datos del cliente y
+confirmación. Subtotales y total se calculan automáticamente en el
+modelo. Confirmar NO descuenta inventario (eso ocurre al pagar, 5.3).
+===============================================================================
+-->
+<div class="container-xl">
+
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="sales-title">Pedido actual</h1>
+      {% if order %}
+        <p class="text-muted mb-0">
+          {{ order.code }} ·
+          <span class="badge order-badge order-badge--{{ order.status }}">{{ order.status_label }}</span>
+        </p>
+      {% endif %}
+    </div>
+    <a class="btn btn-outline-secondary ms-auto" href="{{ url_for('sales.panel') }}">
+      <i class="bi bi-search me-1"></i>Seguir buscando productos
+    </a>
+  </div>
+
+  {% if order and order.items %}
+    <div class="row g-4">
+      <div class="col-lg-8">
+        {# ==========================================================
+           Renglones del pedido
+        ========================================================== #}
+        <div class="card shadow-sm">
+          <div class="table-responsive">
+            <table class="table align-middle admin-table mb-0">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="text-end">Precio</th>
+                  <th class="text-center">Cantidad</th>
+                  <th class="text-end">Subtotal</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order.items %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">{{ item.product.name }}</div>
+                      <small class="text-muted">
+                        {{ item.product.code }} · {{ item.product.commercial_presentation }}
+                        · mínimo {{ get_minimum(item.product) }}
+                      </small>
+                    </td>
+
+                    <td class="text-end">Q {{ "%.2f"|format(item.unit_price) }}</td>
+
+                    <td class="text-center">
+                      <div class="order-qty">
+                        <form method="post" action="{{ url_for('sales.order_item_change', item_id=item.id) }}" class="d-inline">
+                          {{ csrf_form.csrf_token }}
+                          <input type="hidden" name="delta" value="-1">
+                          <button type="submit" class="btn btn-sm btn-outline-secondary order-qty__btn"
+                                  aria-label="Disminuir cantidad">−</button>
+                        </form>
+
+                        <span class="order-qty__value">{{ item.quantity }}</span>
+
+                        <form method="post" action="{{ url_for('sales.order_item_change', item_id=item.id) }}" class="d-inline">
+                          {{ csrf_form.csrf_token }}
+                          <input type="hidden" name="delta" value="1">
+                          <button type="submit" class="btn btn-sm btn-outline-secondary order-qty__btn"
+                                  aria-label="Aumentar cantidad">+</button>
+                        </form>
+                      </div>
+                    </td>
+
+                    <td class="text-end fw-semibold">Q {{ "%.2f"|format(item.subtotal) }}</td>
+
+                    <td class="text-end">
+                      <form method="post" action="{{ url_for('sales.order_item_remove', item_id=item.id) }}" class="d-inline"
+                            onsubmit="return confirm('¿Quitar {{ item.product.code }} del pedido?');">
+                        {{ csrf_form.csrf_token }}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        {# ==========================================================
+           Resumen + datos del cliente + confirmación
+        ========================================================== #}
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="mb-3">Resumen</h5>
+
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Productos</span>
+              <span>{{ order.items|length }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Unidades</span>
+              <span>{{ order.total_units }}</span>
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-between fs-5 mb-3">
+              <span>Total</span>
+              <strong>Q {{ "%.2f"|format(order.total) }}</strong>
+            </div>
+
+            <form method="post" action="{{ url_for('sales.order_confirm') }}" novalidate>
+              {{ confirm_form.csrf_token }}
+
+              <div class="mb-3">
+                {{ confirm_form.customer_name.label(class="form-label fw-semibold") }}
+                {{ confirm_form.customer_name(class="form-control" + (" is-invalid" if confirm_form.customer_name.errors else ""), placeholder="Nombre del cliente") }}
+                {% for error in confirm_form.customer_name.errors %}
+                  <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="mb-3">
+                {{ confirm_form.customer_phone.label(class="form-label fw-semibold") }}
+                {{ confirm_form.customer_phone(class="form-control" + (" is-invalid" if confirm_form.customer_phone.errors else ""), placeholder="Teléfono del cliente") }}
+                {% for error in confirm_form.customer_phone.errors %}
+                  <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100"
+                      onclick="return confirm('¿Confirmar el pedido? Pasará a Pendiente de pago.');">
+                Confirmar pedido
+              </button>
+
+              <p class="text-muted mt-3 mb-0" style="font-size: 0.85rem;">
+                <i class="bi bi-info-circle me-1"></i>Confirmar no descuenta
+                inventario: el stock baja únicamente al registrar el pago.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-cart sales-empty-icon"></i>
+        <h5 class="mb-2">Tu pedido está vacío</h5>
+        <p class="text-muted mb-3">
+          Busca productos y usa «Agregar» para armar el pedido del cliente.
+        </p>
+        <a class="btn btn-primary" href="{{ url_for('sales.panel') }}">
+          <i class="bi bi-search me-1"></i>Buscar productos
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

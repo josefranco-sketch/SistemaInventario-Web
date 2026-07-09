@@ -103,3 +103,40 @@
     border: 1px solid var(--la-border);
     flex-shrink: 0;
 }
+
+/* --------------------------------------------------------------
+   Pedidos (Sprint 5.2)
+   -------------------------------------------------------------- */
+
+/* Badges de estado del pedido (texto + color, nunca color solo) */
+.order-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.order-badge--borrador   { background-color: var(--la-surface-alt); color: var(--la-text-muted); }
+.order-badge--pendiente  { background-color: var(--la-warning-soft); color: #B45309; }
+.order-badge--pagado     { background-color: var(--la-success-soft); color: var(--la-success); }
+.order-badge--cancelado  { background-color: var(--la-danger-soft); color: var(--la-danger); }
+
+/* Controles de cantidad + / − */
+.order-qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-qty__btn {
+    min-width: 34px;
+    min-height: 34px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.order-qty__value {
+    min-width: 2rem;
+    text-align: center;
+    font-weight: 700;
+    color: var(--la-carbon);
+}

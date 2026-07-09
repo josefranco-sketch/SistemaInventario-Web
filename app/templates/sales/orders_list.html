@@ -1,0 +1,84 @@
+{% extends "sales/base_sales.html" %}
+
+{% block title %}Mis pedidos | Los Altos{% endblock %}
+
+{% block sales_content %}
+<!--
+===============================================================================
+PEDIDOS DEL VENDEDOR
+
+Lista simple de los pedidos del vendedor con su estado. El historial
+completo con filtros y comprobante llega en el Sprint 5.4.
+===============================================================================
+-->
+<div class="container-xl">
+
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+    <h1 class="sales-title mb-0">Mis pedidos</h1>
+    <a class="btn btn-outline-secondary ms-auto" href="{{ url_for('sales.current_order') }}">
+      <i class="bi bi-cart me-1"></i>Pedido actual
+    </a>
+  </div>
+
+  {% if orders %}
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle admin-table mb-0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Estado</th>
+              <th class="text-end">Productos</th>
+              <th class="text-end">Total</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td class="fw-semibold">{{ order.code }}</td>
+                <td class="text-nowrap">{{ order.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>{{ order.customer_name or "—" }}</td>
+                <td>
+                  <span class="badge order-badge order-badge--{{ order.status }}">
+                    {{ order.status_label }}
+                  </span>
+                </td>
+                <td class="text-end">{{ order.items|length }}</td>
+                <td class="text-end fw-semibold">Q {{ "%.2f"|format(order.total) }}</td>
+                <td class="text-end">
+                  {% if order.is_editable %}
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('sales.current_order') }}">
+                      Continuar
+                    </a>
+                  {% else %}
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('sales.order_detail', order_id=order.id) }}">
+                      Ver
+                    </a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-cart sales-empty-icon"></i>
+        <h5 class="mb-2">Aún no tienes pedidos</h5>
+        <p class="text-muted mb-3">
+          Busca productos y arma tu primer pedido.
+        </p>
+        <a class="btn btn-primary" href="{{ url_for('sales.panel') }}">
+          <i class="bi bi-search me-1"></i>Buscar productos
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

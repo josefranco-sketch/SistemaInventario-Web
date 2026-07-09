@@ -87,6 +87,7 @@ categoría — datos que el cliente público nunca ve.
               <th class="text-end">Venta mínima</th>
               <th class="text-end">Stock</th>
               <th>Disponibilidad</th>
+              <th class="text-end">Pedido</th>
             </tr>
           </thead>
           <tbody>
@@ -135,6 +136,19 @@ categoría — datos que el cliente público nunca ve.
                     {{ product.availability_label }}
                   </span>
                 </td>
+
+                <td class="text-end">
+                  {# Agrega el producto al pedido actual con su venta
+                     mínima; las cantidades se ajustan en el pedido. #}
+                  <form method="post" action="{{ url_for('sales.order_add', product_id=product.id) }}" class="d-inline">
+                    {{ csrf_form.csrf_token }}
+                    <input type="hidden" name="quantity" value="{{ item.minimum_sale }}">
+                    <input type="hidden" name="next" value="{{ request.full_path }}">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-cart-plus me-1"></i>Agregar
+                    </button>
+                  </form>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
@@ -144,8 +158,8 @@ categoría — datos que el cliente público nunca ve.
 
     <p class="text-muted mt-3 mb-0">
       <i class="bi bi-info-circle me-1"></i>El stock exacto es información
-      interna: el cliente solo ve la disponibilidad. La creación de pedidos
-      llega en el Sprint 5.2.
+      interna: el cliente solo ve la disponibilidad. «Agregar» usa la venta
+      mínima de la categoría; ajusta cantidades en el pedido.
     </p>
   {% else %}
     <div class="card shadow-sm">

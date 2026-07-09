@@ -62,10 +62,16 @@ Proyecto: Sistema Integral de Gestión Comercial
             </a>
           </li>
           <li class="nav-item">
-            <span class="nav-link sales-navbar__link sales-navbar__link--disabled"
-                  title="Disponible en el Sprint 5.2">
-              <i class="bi bi-cart me-1"></i>Pedidos <small class="sales-navbar__soon">5.2</small>
-            </span>
+            <a class="nav-link sales-navbar__link {% if request.endpoint == 'sales.current_order' %}active{% endif %}"
+               href="{{ url_for('sales.current_order') }}">
+              <i class="bi bi-cart me-1"></i>Pedido actual
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link sales-navbar__link {% if request.endpoint in ('sales.orders_list', 'sales.order_detail') %}active{% endif %}"
+               href="{{ url_for('sales.orders_list') }}">
+              <i class="bi bi-receipt me-1"></i>Mis pedidos
+            </a>
           </li>
           {% if current_user.is_admin() %}
             <li class="nav-item">
