@@ -1,0 +1,138 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Dashboard | Los Altos{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block admin_content %}
+<!--
+===============================================================================
+DASHBOARD ADMINISTRATIVO
+
+Pantalla principal del panel interno:
+- Fila de indicadores (KPIs) con los números principales del sistema.
+- Accesos rápidos hacia los módulos internos.
+
+Los valores vienen calculados desde app/services/dashboard_service.py;
+este template solo los presenta.
+===============================================================================
+-->
+<div class="container-xl">
+
+  {% if summary.demo_data %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <i class="bi bi-info-circle me-1"></i>
+      El indicador de cotizaciones muestra <strong>datos de demostración</strong>;
+      se conectará en la Fase 6. Los demás indicadores (productos, bajo stock,
+      pedidos y usuarios) ya son reales.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+  {% endif %}
+
+  {# ==========================================================
+     Indicadores principales (KPIs)
+     La lista "tiles" define cada tarjeta: etiqueta, icono,
+     tono visual y el valor que entrega el servicio.
+  ========================================================== #}
+  {% set tiles = [
+    {"label": "Total de productos", "icon": "bi-box-seam", "tone": "brand", "value": summary.total_products},
+    {"label": "Productos activos", "icon": "bi-check-circle", "tone": "success", "value": summary.active_products},
+    {"label": "Bajo stock", "icon": "bi-exclamation-triangle", "tone": "warning", "value": summary.low_stock},
+    {"label": "Cotizaciones pendientes", "icon": "bi-file-earmark-text", "tone": "info", "value": summary.pending_quotes},
+    {"label": "Pedidos (7 días)", "icon": "bi-cart", "tone": "neutral", "value": summary.recent_orders},
+    {"label": "Usuarios internos", "icon": "bi-people", "tone": "neutral", "value": summary.total_users},
+  ] %}
+
+  <section aria-label="Indicadores principales">
+    <div class="row row-cols-2 row-cols-md-3 row-cols-xxl-6 g-3">
+      {% for tile in tiles %}
+        <div class="col">
+          <div class="kpi-card">
+            <span class="kpi-card__icon kpi-card__icon--{{ tile.tone }}">
+              <i class="bi {{ tile.icon }}"></i>
+            </span>
+            <div class="kpi-card__body">
+              <p class="kpi-card__label">{{ tile.label }}</p>
+              <p class="kpi-card__value">{{ tile.value }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ==========================================================
+     Accesos rápidos hacia los módulos internos
+     Los módulos aún no construidos se muestran deshabilitados
+     con el sprint/fase en que estarán disponibles.
+  ========================================================== #}
+  <section class="mt-4" aria-label="Accesos rápidos">
+    <h2 class="admin-section-title">Accesos rápidos</h2>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
+
+      {# Accesos reales: módulos ya construidos #}
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('admin.products_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-box-seam"></i></span>
+          <div>
+            <p class="shortcut-card__title">Productos</p>
+            <p class="shortcut-card__text">Crear y administrar el catálogo de productos.</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('admin.inventory_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-clipboard-data"></i></span>
+          <div>
+            <p class="shortcut-card__title">Inventario</p>
+            <p class="shortcut-card__text">Existencias, movimientos y bajo stock.</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('admin.users_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-people"></i></span>
+          <div>
+            <p class="shortcut-card__title">Usuarios</p>
+            <p class="shortcut-card__text">Administradores y vendedores del sistema.</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('sales.orders_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-cart"></i></span>
+          <div>
+            <p class="shortcut-card__title">Ventas</p>
+            <p class="shortcut-card__text">Pedidos, pagos y comprobantes internos.</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('sales.quotes_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-file-earmark-text"></i></span>
+          <div>
+            <p class="shortcut-card__title">Cotizaciones</p>
+            <p class="shortcut-card__text">Solicitudes de cotización de clientes.</p>
+          </div>
+        </a>
+      </div>
+
+      {# Acceso real disponible desde ya: el sitio público #}
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('public.home') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-globe2"></i></span>
+          <div>
+            <p class="shortcut-card__title">Sitio público</p>
+            <p class="shortcut-card__text">Ver el catálogo tal como lo ve el cliente.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

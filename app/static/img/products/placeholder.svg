@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <!-- Imagen genérica para productos sin fotografía -->
+  <rect width="600" height="600" fill="#F3F4F6"/>
+  <g fill="none" stroke="#CED4DA" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="185" y="205" width="230" height="190" rx="18"/>
+    <circle cx="250" cy="270" r="22"/>
+    <path d="M205 370 L285 295 L340 345 L385 305 L415 335"/>
+  </g>
+  <text x="300" y="465" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" fill="#6C757D">Imagen no disponible</text>
+</svg>

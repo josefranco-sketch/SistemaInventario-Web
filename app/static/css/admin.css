@@ -1,0 +1,448 @@
+/* ==============================================================
+   ESTILOS DEL ÁREA ADMINISTRATIVA
+
+   CSS por área según la convención del proyecto. Consume las
+   variables definidas en :root de styles.css (paleta oficial);
+   aquí no se hardcodean colores de marca.
+
+   Estructura:
+   1. Layout general (sidebar + contenido)
+   2. Sidebar
+   3. Header administrativo
+   4. Tarjetas KPI del dashboard
+   5. Accesos rápidos
+   6. Responsive
+   ============================================================== */
+
+/* --------------------------------------------------------------
+   1. Layout general
+   -------------------------------------------------------------- */
+
+.admin-body {
+    background-color: var(--la-bg);
+}
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-main {
+    flex: 1;
+    min-width: 0; /* evita que el contenido fluido desborde el flex */
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-content {
+    padding: 1.5rem 1rem 3rem;
+}
+
+/* --------------------------------------------------------------
+   2. Sidebar (256px fija en escritorio, offcanvas en móvil)
+   -------------------------------------------------------------- */
+
+.admin-sidebar {
+    --bs-offcanvas-bg: var(--la-sidebar-bg);
+    background-color: var(--la-sidebar-bg);
+    color: #ffffff;
+}
+
+.admin-sidebar__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.25rem 1rem;
+}
+
+.admin-sidebar__brand {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    padding: 0.25rem 0.75rem;
+}
+
+.admin-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.admin-sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.625rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-height: 44px; /* objetivo táctil mínimo */
+}
+
+.admin-sidebar__link i {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.admin-sidebar__link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Elemento activo en rosa, según el Design System */
+.admin-sidebar__link.active {
+    color: #ffffff;
+    background-color: var(--la-sidebar-active);
+    font-weight: 600;
+}
+
+/* Módulos aún no disponibles */
+.admin-sidebar__link--disabled {
+    color: rgba(255, 255, 255, 0.35);
+    cursor: default;
+}
+
+.admin-sidebar__link--disabled:hover {
+    color: rgba(255, 255, 255, 0.35);
+    background-color: transparent;
+}
+
+.admin-sidebar__soon {
+    margin-left: auto;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 0.05rem 0.5rem;
+}
+
+.admin-sidebar__footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 1rem;
+}
+
+/* Sidebar fija en escritorio.
+
+   IMPORTANTE: a partir de 992px, Bootstrap le pone a .offcanvas-lg
+   fondo transparente con !important y resetea el padding del
+   .offcanvas-body. Aquí recuperamos el fondo carbón y el padding
+   con la misma fuerza; si no, la sidebar se ve blanca. */
+@media (min-width: 992px) {
+    .admin-sidebar {
+        width: 256px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background-color: var(--la-sidebar-bg) !important;
+    }
+
+    .admin-sidebar .admin-sidebar__body {
+        padding: 1.25rem 1rem;
+        flex-direction: column;
+        height: 100%;
+    }
+}
+
+/* --------------------------------------------------------------
+   3. Header administrativo
+   -------------------------------------------------------------- */
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 64px;
+    padding: 0.75rem 1rem;
+    background-color: var(--la-surface);
+    border-bottom: 1px solid var(--la-border);
+}
+
+.admin-header__toggle {
+    border: 1px solid var(--la-border);
+    border-radius: 0.625rem;
+    color: var(--la-carbon);
+    font-size: 1.25rem;
+    line-height: 1;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.admin-header__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin: 0;
+}
+
+.admin-header__user {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-header__name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--la-text);
+}
+
+/* --------------------------------------------------------------
+   4. Tarjetas KPI del dashboard
+   -------------------------------------------------------------- */
+
+.kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1rem;
+    padding: 1rem;
+    height: 100%;
+}
+
+.kpi-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 0.75rem;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+/* Tonos suaves de la paleta; el icono lleva el color pleno */
+.kpi-card__icon--brand   { background-color: var(--la-brand-soft);   color: var(--la-brand-active); }
+.kpi-card__icon--success { background-color: var(--la-success-soft); color: var(--la-success); }
+.kpi-card__icon--warning { background-color: var(--la-warning-soft); color: #B45309; }
+.kpi-card__icon--info    { background-color: var(--la-info-soft);    color: var(--la-info); }
+.kpi-card__icon--neutral { background-color: var(--la-surface-alt);  color: var(--la-text-muted); }
+
+.kpi-card__body {
+    min-width: 0;
+}
+
+.kpi-card__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--la-text-muted);
+    margin: 0 0 0.15rem;
+}
+
+/* El valor usa tinta de texto (no color de marca) */
+.kpi-card__value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--la-carbon);
+    margin: 0;
+}
+
+/* --------------------------------------------------------------
+   5. Accesos rápidos
+   -------------------------------------------------------------- */
+
+.admin-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin-bottom: 0.75rem;
+}
+
+.shortcut-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1rem;
+    padding: 1rem;
+    height: 100%;
+    text-decoration: none;
+}
+
+a.shortcut-card:hover {
+    border-color: var(--la-brand-border);
+    box-shadow: 0 6px 16px rgba(17, 24, 39, 0.06);
+}
+
+.shortcut-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 0.75rem;
+    background-color: var(--la-surface-alt);
+    color: var(--la-carbon);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.shortcut-card__title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin: 0 0 0.15rem;
+}
+
+.shortcut-card__text {
+    font-size: 0.85rem;
+    color: var(--la-text-muted);
+    margin: 0;
+}
+
+.shortcut-card__soon {
+    background-color: var(--la-surface-alt);
+    color: var(--la-text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.shortcut-card--disabled {
+    opacity: 0.75;
+}
+
+/* --------------------------------------------------------------
+   6. Responsive
+   -------------------------------------------------------------- */
+
+@media (min-width: 992px) {
+    .admin-content {
+        padding: 1.5rem 1.5rem 3rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .kpi-card {
+        padding: 0.85rem;
+    }
+
+    .kpi-card__value {
+        font-size: 1.35rem;
+    }
+}
+
+/* --------------------------------------------------------------
+   7. Módulo de Productos (listado + formularios internos)
+   -------------------------------------------------------------- */
+
+.admin-filter-card {
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.admin-table {
+    font-size: 0.9rem;
+}
+
+.admin-table thead th {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--la-text-muted);
+    border-bottom-color: var(--la-border);
+    white-space: nowrap;
+}
+
+.admin-table td {
+    border-bottom-color: var(--la-border);
+}
+
+.admin-form-card {
+    max-width: 860px;
+}
+
+/* Badges de estado del producto (siempre texto + color) */
+.status-badge,
+.availability-badge,
+.category-chip {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.status-badge--activo     { background-color: var(--la-success-soft); color: var(--la-success); }
+.status-badge--inactivo   { background-color: var(--la-disabled-soft); color: var(--la-text-muted); }
+.status-badge--archivado  { background-color: var(--la-carbon); color: #ffffff; }
+
+.availability-badge--disponible { background-color: var(--la-success-soft); color: var(--la-success); }
+.availability-badge--baja       { background-color: var(--la-warning-soft); color: #B45309; }
+.availability-badge--agotado    { background-color: var(--la-danger-soft); color: var(--la-danger); }
+
+/* Chips de categoría con los colores de identidad de la paleta */
+.category-chip--cosmetics { background-color: var(--la-category-cosmetics-soft); color: var(--la-carbon); }
+.category-chip--toys      { background-color: var(--la-category-toys-soft); color: var(--la-carbon); }
+.category-chip--flowers   { background-color: var(--la-category-flowers-soft); color: var(--la-carbon); }
+
+/* Miniatura de la imagen actual en el formulario de producto */
+.admin-product-thumb {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid var(--la-border);
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------
+   8. Módulo de Inventario
+   -------------------------------------------------------------- */
+
+/* Stock exacto (visible solo en pantallas internas) */
+.inventory-stock {
+    font-weight: 700;
+    color: var(--la-carbon);
+}
+
+.inventory-stock--low {
+    color: #B45309; /* mismo tono de advertencia de los badges */
+}
+
+.inventory-stock--out {
+    color: var(--la-danger);
+}
+
+/* Badges de tipo de movimiento */
+.movement-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.movement-badge--entrada { background-color: var(--la-success-soft); color: var(--la-success); }
+.movement-badge--salida  { background-color: var(--la-warning-soft); color: #B45309; }
+
+/* --------------------------------------------------------------
+   9. Módulo de Usuarios
+   -------------------------------------------------------------- */
+
+/* Badges de rol (texto + color, nunca color solo) */
+.role-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.role-badge--admin    { background-color: var(--la-brand-soft); color: var(--la-brand-active); }
+.role-badge--vendedor { background-color: var(--la-info-soft); color: var(--la-info); }
+
+/* Movimiento tipo venta (generado por el sistema al pagar un pedido) */
+.movement-badge--venta { background-color: var(--la-info-soft); color: var(--la-info); }

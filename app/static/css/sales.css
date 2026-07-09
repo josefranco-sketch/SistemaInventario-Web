@@ -1,0 +1,314 @@
+/* ==============================================================
+   ESTILOS DEL ÁREA DE VENTAS
+
+   CSS por área según la convención del proyecto. Consume las
+   variables de :root (styles.css) y reutiliza los componentes
+   internos compartidos de admin.css (badges, tablas, filtros).
+   ============================================================== */
+
+.sales-body {
+    background-color: var(--la-bg);
+}
+
+/* --------------------------------------------------------------
+   Barra superior del vendedor (carbón, activo en rosa)
+   -------------------------------------------------------------- */
+
+.sales-navbar {
+    background-color: var(--la-sidebar-bg);
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+
+.sales-navbar__brand {
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.sales-navbar__toggler {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.sales-navbar__toggler .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+.sales-navbar__link {
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.85rem;
+}
+
+.sales-navbar__link:hover {
+    color: #ffffff;
+}
+
+/* Sección activa en rosa, igual que la sidebar admin */
+.sales-navbar__link.active {
+    color: #ffffff;
+    background-color: var(--la-sidebar-active);
+    font-weight: 600;
+}
+
+.sales-navbar__link--disabled {
+    color: rgba(255, 255, 255, 0.35);
+    cursor: default;
+}
+
+.sales-navbar__soon {
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 0.05rem 0.45rem;
+    margin-left: 0.25rem;
+}
+
+.sales-navbar__user {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------
+   Contenido
+   -------------------------------------------------------------- */
+
+.sales-content {
+    padding: 1.5rem 0 3rem;
+}
+
+.sales-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin-bottom: 0.25rem;
+}
+
+.sales-empty-icon {
+    font-size: 2rem;
+    color: var(--la-text-muted);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.sales-product-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid var(--la-border);
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------
+   Pedidos (Sprint 5.2)
+   -------------------------------------------------------------- */
+
+/* Badges de estado del pedido (texto + color, nunca color solo) */
+.order-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.order-badge--borrador   { background-color: var(--la-surface-alt); color: var(--la-text-muted); }
+.order-badge--pendiente  { background-color: var(--la-warning-soft); color: #B45309; }
+.order-badge--pagado     { background-color: var(--la-success-soft); color: var(--la-success); }
+.order-badge--cancelado  { background-color: var(--la-danger-soft); color: var(--la-danger); }
+
+/* Controles de cantidad + / − */
+.order-qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-qty__btn {
+    min-width: 34px;
+    min-height: 34px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.order-qty__value {
+    min-width: 2rem;
+    text-align: center;
+    font-weight: 700;
+    color: var(--la-carbon);
+}
+
+/* --------------------------------------------------------------
+   Comprobante interno de venta (Sprint 5.4)
+   -------------------------------------------------------------- */
+
+.receipt-body {
+    background-color: var(--la-bg);
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--la-text);
+}
+
+.receipt-toolbar {
+    max-width: 640px;
+    margin: 1rem auto 0;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.receipt-back {
+    color: var(--la-link);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.receipt-print-btn {
+    background-color: var(--la-brand);
+    color: #ffffff;
+    border: none;
+    border-radius: 0.625rem;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 40px;
+}
+
+.receipt-print-btn:hover {
+    background-color: var(--la-brand-hover);
+}
+
+.receipt {
+    max-width: 640px;
+    margin: 1rem auto 3rem;
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1rem;
+    padding: 2rem;
+}
+
+.receipt__header {
+    text-align: center;
+    border-bottom: 1px dashed var(--la-border);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.receipt__logo {
+    height: 44px;
+    margin-bottom: 0.5rem;
+}
+
+.receipt__store {
+    font-size: 0.85rem;
+    color: var(--la-text-muted);
+    margin: 0 0 0.75rem;
+}
+
+.receipt__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.receipt__code {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--la-brand-active);
+    margin: 0.25rem 0 0;
+}
+
+.receipt__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+}
+
+.receipt__label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--la-text-muted);
+}
+
+.receipt__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.receipt__table th,
+.receipt__table td {
+    text-align: left;
+    padding: 0.5rem 0.25rem;
+    border-bottom: 1px solid var(--la-border);
+    vertical-align: top;
+}
+
+.receipt__table small {
+    display: block;
+    color: var(--la-text-muted);
+}
+
+.receipt__num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.receipt__table tfoot td {
+    font-weight: 700;
+    border-bottom: none;
+    padding-top: 0.75rem;
+}
+
+.receipt__total {
+    font-size: 1.15rem;
+    color: var(--la-carbon);
+}
+
+.receipt__footer {
+    margin-top: 1.5rem;
+    border-top: 1px dashed var(--la-border);
+    padding-top: 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--la-text-muted);
+}
+
+/* Al imprimir: solo el comprobante, sin fondos ni botones */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .receipt-body {
+        background-color: #ffffff;
+    }
+
+    .receipt {
+        border: none;
+        margin: 0 auto;
+        padding: 0;
+    }
+}
+
+/* Badges de estado de cotización (Sprint 6.2) */
+.quote-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.quote-badge--pendiente  { background-color: var(--la-warning-soft); color: #B45309; }
+.quote-badge--convertida { background-color: var(--la-success-soft); color: var(--la-success); }

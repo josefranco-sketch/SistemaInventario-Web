@@ -1,0 +1,381 @@
+# ==========================================================
+# Servicio de pedidos.
+#
+# Toda la lógica de negocio del armado de pedidos vive aquí:
+# - Cada vendedor tiene UN borrador activo a la vez (su "pedido
+#   actual"); al confirmarlo pasa a Pendiente de pago y el
+#   siguiente producto agregado abre un borrador nuevo.
+# - Los renglones apuntan a productos existentes y no se
+#   duplican: agregar un producto repetido incrementa su renglón.
+# - La venta mínima por categoría (ADR) se valida SIEMPRE:
+#   la cantidad de un renglón nunca puede quedar debajo de su
+#   mínimo (para menos, se quita el producto completo).
+# - Subtotales y total se calculan automáticamente (modelo).
+#
+# REGLA ADR CRÍTICA: un borrador o un pedido pendiente de pago
+# JAMÁS descuentan stock. El ÚNICO punto del sistema donde una
+# venta toca el inventario es mark_as_paid() (al final de este
+# archivo), y descuenta una sola vez por pedido.
+# ==========================================================
+from datetime import datetime, timedelta
+
+from app.extensions import db
+from app.models.inventory import MOVEMENT_SALE
+from app.models.order import (
+    ORDER_CANCELLED,
+    ORDER_DRAFT,
+    ORDER_PAID,
+    ORDER_PENDING,
+    ORDER_STATUSES,
+    Order,
+    OrderItem,
+)
+from app.models.product import STATUS_ACTIVE
+from app.services import inventory_service, products_service
+
+
+# ----------------------------------------------------------
+# Consultas
+# ----------------------------------------------------------
+
+def get_order_or_none(order_id):
+    return db.session.get(Order, order_id)
+
+
+def get_item_or_none(item_id):
+    return db.session.get(OrderItem, item_id)
+
+
+def get_current_draft(seller):
+    """El borrador activo del vendedor, o None si no tiene."""
+    return Order.query.filter_by(seller_id=seller.id, status=ORDER_DRAFT).first()
+
+
+def get_or_create_draft(seller):
+    """Regresa el borrador del vendedor; si no existe lo crea."""
+    order = get_current_draft(seller)
+    if order is not None:
+        return order
+
+    order = Order(seller_id=seller.id, code="TMP")
+    db.session.add(order)
+    db.session.flush()  # asigna el id para generar el código
+
+    order.code = f"PED-{order.id:04d}"
+    db.session.commit()
+    return order
+
+
+def list_orders_by_seller(seller):
+    """Pedidos del vendedor, del más reciente al más antiguo."""
+    return (
+        Order.query.filter_by(seller_id=seller.id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+
+
+def list_orders(status="", seller_id=None, customer="", date_from=None, date_to=None):
+    """Historial de pedidos de la tienda con filtros simples.
+
+    Filtros: estado, vendedor, cliente (texto) y rango de fechas
+    (objetos date; el "hasta" es inclusivo). Todo el personal puede
+    consultar el historial de ventas de la tienda.
+    """
+    query = Order.query
+
+    if status in ORDER_STATUSES:
+        query = query.filter(Order.status == status)
+
+    if seller_id:
+        query = query.filter(Order.seller_id == seller_id)
+
+    if customer:
+        query = query.filter(Order.customer_name.ilike(f"%{customer}%"))
+
+    if date_from is not None:
+        query = query.filter(
+            Order.created_at >= datetime.combine(date_from, datetime.min.time())
+        )
+
+    if date_to is not None:
+        # Inclusivo: hasta el final del día indicado
+        end = datetime.combine(date_to, datetime.min.time()) + timedelta(days=1)
+        query = query.filter(Order.created_at < end)
+
+    return query.order_by(Order.created_at.desc()).all()
+
+
+def count_recent_orders(days=7):
+    """Pedidos (no borradores) creados en los últimos días, para el
+    indicador del dashboard."""
+    since = datetime.now() - timedelta(days=days)
+    return Order.query.filter(
+        Order.status != ORDER_DRAFT,
+        Order.created_at >= since,
+    ).count()
+
+
+def _find_item(order, product_id):
+    """Busca el renglón de un producto dentro del pedido."""
+    for item in order.items:
+        if item.product_id == product_id:
+            return item
+    return None
+
+
+# ----------------------------------------------------------
+# Armado del pedido (solo borradores)
+# ----------------------------------------------------------
+
+def add_product(order, product, quantity=None):
+    """Agrega un producto al borrador (o incrementa su renglón).
+
+    Si no se indica cantidad, se usa la venta mínima de su
+    categoría. Regresa (True/False, mensaje).
+    """
+    if not order.is_editable:
+        return False, "Este pedido ya no se puede modificar."
+
+    if product.status != STATUS_ACTIVE:
+        return False, f"El producto {product.code} no está activo para venta."
+
+    minimum = products_service.get_minimum_sale(product)
+
+    if quantity is None:
+        quantity = minimum
+
+    if quantity < 1:
+        return False, "La cantidad debe ser mayor a cero."
+
+    item = _find_item(order, product.id)
+
+    if item is not None:
+        # No se duplica el producto: se incrementa su renglón
+        item.quantity += quantity
+        db.session.commit()
+        return True, f"{product.code}: cantidad actualizada a {item.quantity}."
+
+    if quantity < minimum:
+        return False, (
+            f"La venta mínima de {product.code} es {minimum} "
+            f"({product.category.name})."
+        )
+
+    item = OrderItem(
+        order=order,
+        product_id=product.id,
+        quantity=quantity,
+        unit_price=product.price,  # precio congelado al agregar
+    )
+    db.session.add(item)
+    db.session.commit()
+    return True, f"{product.code} agregado al pedido ({quantity})."
+
+
+def change_quantity(order, item, delta):
+    """Incrementa o disminuye la cantidad de un renglón.
+
+    La cantidad nunca puede quedar debajo de la venta mínima de la
+    categoría: para menos que eso, se quita el producto completo.
+    Regresa (True/False, mensaje).
+    """
+    if not order.is_editable:
+        return False, "Este pedido ya no se puede modificar."
+
+    minimum = products_service.get_minimum_sale(item.product)
+    new_quantity = item.quantity + delta
+
+    if new_quantity < minimum:
+        return False, (
+            f"La venta mínima de {item.product.code} es {minimum}. "
+            "Si ya no lo quieres, usa «Quitar»."
+        )
+
+    item.quantity = new_quantity
+    db.session.commit()
+    return True, f"{item.product.code}: cantidad actualizada a {new_quantity}."
+
+
+def remove_product(order, item):
+    """Quita un renglón completo del borrador."""
+    if not order.is_editable:
+        return False, "Este pedido ya no se puede modificar."
+
+    code = item.product.code
+    db.session.delete(item)
+    db.session.commit()
+    return True, f"{code} quitado del pedido."
+
+
+# ----------------------------------------------------------
+# Confirmación: Borrador → Pendiente de pago
+# ----------------------------------------------------------
+
+def confirm_order(order, customer_name, customer_phone=""):
+    """Confirma el borrador y lo deja Pendiente de pago.
+
+    Valida que tenga productos, que todos sigan activos, que las
+    cantidades respeten los mínimos y que haya nombre de cliente.
+
+    IMPORTANTE: aquí NO se descuenta inventario (regla ADR); el
+    descuento ocurre al marcar el pedido como Pagado (Sprint 5.3).
+    Regresa (True/False, mensaje).
+    """
+    if not order.is_editable:
+        return False, "Este pedido ya fue confirmado."
+
+    if not order.items:
+        return False, "El pedido no tiene productos."
+
+    customer_name = customer_name.strip() if customer_name else ""
+    if customer_name == "":
+        return False, "El nombre del cliente es obligatorio para confirmar."
+
+    # Revalidamos cada renglón: el catálogo pudo cambiar mientras
+    # el borrador estaba abierto.
+    for item in order.items:
+        if item.product.status != STATUS_ACTIVE:
+            return False, (
+                f"El producto {item.product.code} ya no está activo; "
+                "quítalo del pedido para continuar."
+            )
+
+        minimum = products_service.get_minimum_sale(item.product)
+        if item.quantity < minimum:
+            return False, (
+                f"{item.product.code} no cumple la venta mínima de {minimum}."
+            )
+
+    order.customer_name = customer_name
+    order.customer_phone = customer_phone.strip() or None if customer_phone else None
+    order.status = ORDER_PENDING
+
+    db.session.commit()
+    return True, (
+        f"Pedido {order.code} confirmado: pendiente de pago. "
+        "El inventario no cambia hasta registrar el pago."
+    )
+
+
+# ----------------------------------------------------------
+# Pago: Pendiente → Pagado (Sprint 5.3)
+#
+# REGLA ADR: este es el ÚNICO lugar del sistema donde una venta
+# descuenta inventario, y ocurre UNA sola vez por pedido.
+# ----------------------------------------------------------
+
+def mark_as_paid(order, user):
+    """Marca el pedido como pagado y descuenta el inventario.
+
+    Secuencia (todo o nada):
+    1. Valida el estado: solo un pedido Pendiente de pago puede
+       pagarse. Si ya está pagado, se rechaza (evita el doble
+       descuento). Un borrador debe confirmarse primero.
+    2. Valida que TODOS los renglones tengan existencia suficiente
+       ANTES de descontar el primero: si un producto no alcanza,
+       no se descuenta nada.
+    3. Descuenta cada renglón vía el servicio de inventario con
+       movimientos tipo "venta" (usuario, fecha y motivo con el
+       código del pedido — trazabilidad completa) y recalcula la
+       disponibilidad pública de cada producto.
+    4. Cambia el estado a Pagado con fecha y quién cobró, y
+       confirma TODO en una sola transacción.
+
+    La pueden ejecutar vendedores y administradores (regla de
+    negocio: marcar pagado no es exclusivo del admin).
+    Regresa (True, mensaje) o (False, mensaje de error).
+    """
+    # --- 1. Estado ---
+    if order.status == ORDER_PAID:
+        return False, (
+            f"El pedido {order.code} ya está pagado; "
+            "el inventario no se descuenta dos veces."
+        )
+
+    if order.status != ORDER_PENDING:
+        return False, (
+            f"Solo un pedido pendiente de pago puede pagarse "
+            f"(este está {order.status_label.lower()})."
+        )
+
+    if not order.items:
+        return False, "El pedido no tiene productos."
+
+    # --- 2. Existencias suficientes para TODO el pedido ---
+    for item in order.items:
+        stock = inventory_service.get_stock(item.product)
+        if item.quantity > stock:
+            return False, (
+                f"Stock insuficiente para {item.product.code}: "
+                f"hay {stock} y el pedido pide {item.quantity}. "
+                "No se descontó nada."
+            )
+
+    # --- 3. Descuento por renglón, en una sola transacción ---
+    for item in order.items:
+        ok, message = inventory_service.register_movement(
+            product=item.product,
+            user=user,
+            movement_type=MOVEMENT_SALE,
+            quantity=item.quantity,
+            reason=f"Venta pedido {order.code}",
+            commit=False,  # se confirma todo junto al final
+        )
+        if not ok:
+            # No debería ocurrir (ya validamos stock), pero si algo
+            # falla se revierte todo: nada de descuentos a medias.
+            db.session.rollback()
+            return False, f"No se pudo descontar {item.product.code}: {message}"
+
+    # --- 4. Estado + trazabilidad, y confirmación única ---
+    order.status = ORDER_PAID
+    order.paid_at = datetime.now()
+    order.paid_by_id = user.id
+
+    db.session.commit()
+    return True, (
+        f"Pedido {order.code} pagado. Inventario descontado y "
+        "disponibilidad pública actualizada."
+    )
+
+
+# ----------------------------------------------------------
+# Cancelación (Sprint 5.4) — sin romper historial
+# ----------------------------------------------------------
+
+def cancel_order(order, user):
+    """Cancela un borrador o un pedido pendiente de pago.
+
+    Reglas:
+    - Un pedido PAGADO no se cancela: su inventario ya se descontó
+      y el sistema no maneja reversos de pago (fuera de alcance).
+    - Solo el vendedor que lo creó o un administrador pueden
+      cancelarlo.
+    - El pedido y sus renglones se CONSERVAN (historial intacto);
+      solo cambia el estado. El inventario no se toca: un borrador
+      o pendiente nunca descontó nada.
+
+    Regresa (True/False, mensaje).
+    """
+    if order.status == ORDER_PAID:
+        return False, (
+            f"El pedido {order.code} ya está pagado y no puede cancelarse "
+            "(el inventario ya fue descontado)."
+        )
+
+    if order.status == ORDER_CANCELLED:
+        return False, f"El pedido {order.code} ya está cancelado."
+
+    if order.seller_id != user.id and not user.is_admin():
+        return False, (
+            "Solo el vendedor que creó el pedido o un administrador "
+            "pueden cancelarlo."
+        )
+
+    order.status = ORDER_CANCELLED
+    db.session.commit()
+    return True, (
+        f"Pedido {order.code} cancelado. El inventario no se tocó y el "
+        "pedido se conserva en el historial."
+    )

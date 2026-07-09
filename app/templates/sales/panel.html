@@ -1,0 +1,177 @@
+{% extends "sales/base_sales.html" %}
+
+{% block title %}Buscar productos | Los Altos{% endblock %}
+
+{% block sales_content %}
+<!--
+===============================================================================
+PANEL DEL VENDEDOR — BUSCADOR DE PRODUCTOS
+
+El vendedor busca por código, nombre o descripción, y filtra por
+categoría. Solo se muestran productos ACTIVOS (fuente única: modelo
+Product). El vendedor sí ve el stock exacto y la venta mínima por
+categoría — datos que el cliente público nunca ve.
+===============================================================================
+-->
+<div class="container-xl">
+
+  <div class="mb-4">
+    <h1 class="sales-title">Buscar productos</h1>
+    <p class="text-muted mb-0">
+      Encuentra productos por código, nombre o descripción para atender al cliente.
+    </p>
+  </div>
+
+  {# ==========================================================
+     Buscador
+  ========================================================== #}
+  <form method="get" action="{{ url_for('sales.panel') }}" class="admin-filter-card mb-4">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-6">
+        <label class="form-label fw-semibold" for="search-q">Buscar</label>
+        <input type="text" id="search-q" name="q" class="form-control form-control-lg"
+               placeholder="Código, nombre o descripción…" value="{{ search }}" autofocus>
+      </div>
+
+      <div class="col-7 col-md-3">
+        <label class="form-label fw-semibold" for="search-category">Categoría</label>
+        <select id="search-category" name="category" class="form-select">
+          <option value="">Todas</option>
+          {% for category in categories %}
+            <option value="{{ category.id }}"
+                    {% if selected_category == category.id %}selected{% endif %}>
+              {{ category.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-5 col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-fill">
+          <i class="bi bi-search me-1"></i>Buscar
+        </button>
+        {% if searched %}
+          <a class="btn btn-link text-decoration-none px-1" href="{{ url_for('sales.panel') }}">Limpiar</a>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+
+  {# ==========================================================
+     Resultados
+  ========================================================== #}
+  {% if not searched %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-search sales-empty-icon"></i>
+        <h5 class="mb-2">Busca un producto para empezar</h5>
+        <p class="text-muted mb-0">
+          Escribe un código (ej. MES3107), un nombre o parte de la descripción,
+          o filtra por categoría.
+        </p>
+      </div>
+    </div>
+  {% elif results %}
+    <p class="text-muted">{{ results|length }} producto(s) encontrado(s)</p>
+
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle admin-table mb-0">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Presentación</th>
+              <th class="text-end">Precio</th>
+              <th class="text-end">Venta mínima</th>
+              <th class="text-end">Stock</th>
+              <th>Disponibilidad</th>
+              <th class="text-end">Pedido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in results %}
+              {% set product = item.product %}
+              <tr>
+                <td class="fw-semibold">{{ product.code }}</td>
+
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    {% if product.image_filename %}
+                      <img src="{{ url_for('static', filename='img/products/' ~ product.image_filename) }}"
+                           alt="{{ product.name }}" class="sales-product-thumb">
+                    {% endif %}
+                    <div>
+                      <div class="fw-semibold">{{ product.name }}</div>
+                      {% if product.brand %}
+                        <small class="text-muted">{{ product.brand }}</small>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="badge category-chip category-chip--{{ product.category.slug }}">
+                    {{ product.category.name }}
+                  </span>
+                  <div><small class="text-muted">{{ product.subcategory.name }}</small></div>
+                </td>
+
+                <td>{{ product.commercial_presentation }}</td>
+
+                <td class="text-end">Q {{ "%.2f"|format(product.price) }}</td>
+
+                <td class="text-end">{{ item.minimum_label }}</td>
+
+                <td class="text-end">
+                  <span class="inventory-stock
+                    {% if item.stock == 0 %}inventory-stock--out{% endif %}">
+                    {{ item.stock }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="badge availability-badge availability-badge--{{ product.availability }}">
+                    {{ product.availability_label }}
+                  </span>
+                </td>
+
+                <td class="text-end">
+                  {# Agrega el producto al pedido actual con su venta
+                     mínima; las cantidades se ajustan en el pedido. #}
+                  <form method="post" action="{{ url_for('sales.order_add', product_id=product.id) }}" class="d-inline">
+                    {{ csrf_form.csrf_token }}
+                    <input type="hidden" name="quantity" value="{{ item.minimum_sale }}">
+                    <input type="hidden" name="next" value="{{ request.full_path }}">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-cart-plus me-1"></i>Agregar
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="text-muted mt-3 mb-0">
+      <i class="bi bi-info-circle me-1"></i>El stock exacto es información
+      interna: el cliente solo ve la disponibilidad. «Agregar» usa la venta
+      mínima de la categoría; ajusta cantidades en el pedido.
+    </p>
+  {% else %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <h5 class="mb-2">Sin resultados</h5>
+        <p class="text-muted mb-0">
+          Ningún producto activo coincide con la búsqueda. Revisa el código o
+          intenta con otra palabra.
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

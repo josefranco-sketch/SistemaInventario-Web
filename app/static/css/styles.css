@@ -1,0 +1,1164 @@
+/*
+===============================================================================
+HOJA DE ESTILOS PRINCIPAL DEL SISTEMA
+-------------------------------------------------------------------------------
+Este archivo contiene los estilos personalizados del Sistema Integral de Gestión
+Comercial.
+
+Bootstrap proporciona la estructura base de la interfaz, mientras que este
+archivo implementa la identidad visual definida en el Design System.
+
+Autor: José Franco
+Proyecto: Sistema Integral de Gestión Comercial
+===============================================================================
+*/
+
+/* =============================================================================
+   PALETA OFICIAL DEL SISTEMA
+   Variables oficiales del Design System.
+============================================================================= */
+
+:root {
+    /* Brand */
+    --la-brand: #F57DA5;
+    --la-brand-hover: #D94F82;
+    --la-brand-active: #C73A70;
+    --la-brand-soft: #FDE8F1;
+    --la-brand-border: #F7BBD2;
+
+    /* Neutral base */
+    --la-bg: #F7F8FA;
+    --la-surface: #FFFFFF;
+    --la-surface-alt: #F3F4F6;
+    --la-border: #E5E7EB;
+    --la-text: #374151;
+    --la-text-muted: #6B7280;
+    --la-carbon: #111827;
+
+    /* Categories */
+    --la-category-cosmetics: #F57DA5;
+    --la-category-cosmetics-soft: #FDE8F1;
+    --la-category-toys: #3D8DDF;
+    --la-category-toys-soft: #E8F3FF;
+    --la-category-flowers: #4CAF6F;
+    --la-category-flowers-soft: #E9F8EF;
+
+    /* States */
+    --la-success: #198754;
+    --la-success-soft: #EAF7EF;
+    --la-warning: #F59E0B;
+    --la-warning-soft: #FFF7E6;
+    --la-danger: #DC3545;
+    --la-danger-soft: #FDECEC;
+    --la-info: #0EA5E9;
+    --la-info-soft: #EAF6FD;
+    --la-disabled: #E5E7EB;
+    --la-disabled-soft: #F3F4F6;
+
+    /* Component aliases */
+    --la-primary: var(--la-brand);
+    --la-primary-hover: var(--la-brand-hover);
+    --la-secondary-bg: var(--la-surface);
+    --la-secondary-border: var(--la-border);
+    --la-link: var(--la-brand-hover);
+    --la-focus-ring: #F57DA73D;
+    --la-card-border: var(--la-border);
+    --la-sidebar-bg: var(--la-carbon);
+    --la-sidebar-active: var(--la-brand);
+}
+
+/* =============================================================================
+   ESTILOS BASE
+============================================================================= */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--la-bg);
+    color: var(--la-text);
+}
+
+/* =============================================================================
+   NAVBAR PÚBLICA
+============================================================================= */
+
+.public-navbar {
+    min-height: 72px;
+    background-color: var(--la-surface);
+    border-bottom: 1px solid var(--la-border);
+}
+
+.public-navbar__container {
+    min-height: 72px;
+    padding-inline: 16px;
+}
+
+@media (min-width: 768px) {
+    .public-navbar__container {
+        padding-inline: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .public-navbar__container {
+        padding-inline: 32px;
+    }
+}
+
+.public-navbar .navbar-brand {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    flex-shrink: 0;
+}
+
+.public-navbar__collapse {
+    align-items: center;
+}
+
+.public-navbar__menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    list-style: none;
+    margin: 0 auto 0;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.public-navbar__menu > li {
+    list-style: none;
+}
+
+.public-navbar__menu > li::marker {
+    content: "";
+}
+
+@media (min-width: 768px) {
+    .public-navbar__menu {
+        gap: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .public-navbar__menu {
+        gap: 32px;
+    }
+}
+
+.public-navbar .nav-link {
+    padding: 12px 8px;
+
+    font-weight: 500;
+    color: var(--la-text);
+
+    transition: color 0.2s ease;
+}
+
+.public-navbar .nav-link:hover,
+.public-navbar .nav-link:focus,
+.public-navbar .nav-link.active {
+    color: var(--la-brand-hover);
+}
+
+.navbar-toggler {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+
+    border-color: var(--la-border);
+    box-shadow: none;
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem var(--la-focus-ring);
+}
+
+.navbar-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 140px;
+    height: 44px;
+
+    padding: 0 24px;
+
+    border: 1px solid var(--la-brand);
+    border-radius: 12px;
+
+    background-color: var(--la-brand);
+
+    color: #FFFFFF;
+    font-weight: 600;
+    line-height: 1;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.navbar-cta:hover,
+.navbar-cta:focus {
+    background-color: var(--la-brand-hover);
+    border-color: var(--la-brand-hover);
+    color: #FFFFFF;
+}
+
+@media (max-width: 767.98px) {
+    .public-navbar__collapse {
+        padding-top: 1rem;
+    }
+
+    .public-navbar__menu {
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+    }
+
+    .navbar-cta {
+        width: 100%;
+        margin-top: 0.75rem;
+    }
+}
+
+/* =============================================================================
+   LOGO DE LA NAVBAR
+============================================================================= */
+
+.navbar-logo {
+    width: 180px;
+    max-height: 46px;
+    height: auto;
+    display: block;
+}
+
+/* =============================================================================
+   FOOTER PÚBLICO
+============================================================================= */
+
+footer {
+    background-color: var(--la-surface);
+    border-top: 1px solid var(--la-border);
+}
+
+footer h5 {
+    color: var(--la-carbon);
+}
+
+footer p {
+    color: var(--la-text-muted);
+    margin-bottom: 0;
+}
+
+footer .text-muted {
+    color: var(--la-text-muted) !important;
+}
+
+.navbar-cta {
+    background-color: var(--la-brand);
+    color: #FFFFFF;
+    border: 1px solid var(--la-brand);
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.navbar-cta:hover,
+.navbar-cta:focus {
+    background-color: var(--la-brand-hover);
+    border-color: var(--la-brand-hover);
+    color: #FFFFFF;
+}
+
+/* =============================================================================
+   HOME PÚBLICA
+============================================================================= */
+
+.home-page {
+    background-color: var(--la-bg);
+}
+
+.home-hero {
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+}
+
+.home-hero__content {
+    max-width: 560px;
+}
+
+.home-hero__eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--la-brand);
+    letter-spacing: 0.02em;
+}
+
+.home-hero__eyebrow-dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 999px;
+    background-color: var(--la-brand);
+    display: inline-block;
+    box-shadow: 0 0 0 4px rgba(245, 125, 165, 0.16);
+}
+
+.home-hero__title {
+    color: var(--la-carbon);
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.home-hero__text {
+    color: var(--la-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 52ch;
+}
+
+.home-hero__cta,
+.home-hero__secondary-cta {
+    min-height: 48px;
+    padding-left: 1.35rem;
+    padding-right: 1.35rem;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.home-hero__cta {
+    background-color: var(--la-brand);
+    border-color: var(--la-brand);
+    color: #FFFFFF;
+}
+
+.home-hero__cta:hover,
+.home-hero__cta:focus {
+    background-color: var(--la-brand-hover);
+    border-color: var(--la-brand-hover);
+    color: #FFFFFF;
+}
+
+.home-hero__secondary-cta {
+    background-color: #FFFFFF;
+    border: 1px solid var(--la-border);
+    color: var(--la-carbon);
+}
+
+.home-hero__secondary-cta:hover,
+.home-hero__secondary-cta:focus {
+    background-color: var(--la-surface);
+    border-color: var(--la-brand);
+    color: var(--la-carbon);
+}
+
+.home-hero__visual {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.home-hero__panel {
+    width: 100%;
+    max-width: 520px;
+    min-height: 320px;
+    background:
+        linear-gradient(180deg, rgba(253, 231, 240, 0.92), rgba(255, 255, 255, 0.98)),
+        radial-gradient(circle at top right, rgba(245, 125, 165, 0.18), transparent 38%);
+    border: 1px solid rgba(245, 125, 165, 0.18);
+    border-radius: 1.5rem;
+    box-shadow: 0 18px 40px rgba(17, 24, 39, 0.08);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.home-hero__panel-kicker {
+    color: var(--la-brand);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.home-hero__panel-title {
+    color: var(--la-carbon);
+    font-size: 1.7rem;
+    line-height: 1.2;
+    font-weight: 700;
+    max-width: 15ch;
+}
+
+.home-hero__panel-text {
+    color: var(--la-text-muted);
+    line-height: 1.7;
+}
+
+.section-heading__title,
+.home-trust__title {
+    color: var(--la-carbon);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.section-heading__title {
+    font-size: 1.9rem;
+}
+
+.section-heading__text,
+.home-trust__text {
+    color: var(--la-text-muted);
+    line-height: 1.7;
+}
+
+.category-card {
+    border: 1px solid var(--la-border);
+    border-radius: 1.25rem;
+    background-color: #FFFFFF;
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 30px rgba(17, 24, 39, 0.08);
+    border-color: rgba(245, 125, 165, 0.35);
+}
+
+.category-card__body {
+    padding: 1.5rem;
+    min-height: 100%;
+}
+
+.category-card__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.category-card__title {
+    color: var(--la-carbon);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.category-card__text {
+    color: var(--la-text-muted);
+    line-height: 1.7;
+}
+
+.category-card--cosmetics {
+    background: linear-gradient(180deg, #FFF7FB 0%, #FFFFFF 100%);
+}
+
+.category-card--cosmetics .category-card__badge {
+    background-color: var(--la-cosmetics-soft);
+    color: var(--la-brand);
+}
+
+.category-card--toys {
+    background: linear-gradient(180deg, #F8FBFF 0%, #FFFFFF 100%);
+}
+
+.category-card--toys .category-card__badge {
+    background-color: var(--la-toys-soft);
+    color: #1D4ED8;
+}
+
+.category-card--flowers {
+    background: linear-gradient(180deg, #F4FBF6 0%, #FFFFFF 100%);
+}
+
+.category-card--flowers .category-card__badge {
+    background-color: var(--la-flowers-soft);
+    color: #15803D;
+}
+
+.home-trust__box {
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
+}
+
+.home-trust__pill {
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    background-color: #FFFFFF;
+    border: 1px solid var(--la-border);
+    color: var(--la-carbon);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+    .home-hero {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    .home-hero__visual {
+        margin-top: 0.5rem;
+    }
+
+    .home-hero__panel {
+        min-height: 280px;
+    }
+
+    .home-trust__pill {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .home-hero__title {
+        font-size: 2rem;
+    }
+
+    .section-heading__title {
+        font-size: 1.5rem;
+    }
+
+    .home-hero__panel {
+        padding: 1.5rem;
+    }
+
+    .category-card__body {
+        padding: 1.25rem;
+    }
+
+    .home-trust__box {
+        padding: 1.25rem;
+    }
+}
+
+/* =============================================================================
+   HERO: MEJORA VISUAL SUTIL
+============================================================================= */
+
+.home-hero__panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.home-hero__panel::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(245, 125, 165, 0.16) 0%,
+        rgba(245, 125, 165, 0) 70%
+    );
+    pointer-events: none;
+}
+
+.home-hero__panel > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* =============================================================================
+   HOME: CATEGORÍAS - PULIDO VISUAL
+============================================================================= */
+
+.home-categories {
+    padding-top: 1rem;
+}
+
+.category-card {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px rgba(17, 24, 39, 0.08);
+    border-color: rgba(245, 125, 165, 0.32);
+}
+
+.category-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    pointer-events: none;
+}
+
+.category-card:hover::before {
+    opacity: 1;
+}
+
+.category-card__badge {
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.category-card:hover .category-card__badge {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(17, 24, 39, 0.05);
+}
+
+.category-card__title {
+    transition: color 0.22s ease;
+}
+
+.category-card:hover .category-card__title {
+    color: var(--la-brand);
+}
+
+/* =========================================================
+   Sprint 3.3 - Catálogo Público
+   Estilos específicos para la pantalla de catálogo
+   Basado en el Design System oficial del proyecto
+========================================================= */
+
+:root {
+  /* Tokens visuales del proyecto */
+  --la-rosa: #F57DA5;
+  --la-rosa-hover: #DD5C8F;
+  --la-rosa-suave: #FDE7F0;
+
+  --la-carbon: #111827;
+  --la-texto: #374151;
+  --la-secundario: #6B7280;
+  --la-linea: #E5E7EB;
+  --la-fondo: #F7F8FA;
+  --la-blanco: #FFFFFF;
+
+  /* Colores de categorías */
+  --la-cosmeticos: #F57DA5;
+  --la-cosmeticos-suave: #FDE7F0;
+  --la-juguetes: #3B82F6;
+  --la-juguetes-suave: #EAF3FF;
+  --la-flores: #22C55E;
+  --la-flores-suave: #EAF8EF;
+
+  /* Estados */
+  --la-exito: #198754;
+  --la-advertencia: #F59E0B;
+  --la-error: #DC3545;
+}
+
+/* =========================================================
+   Base de la página
+========================================================= */
+
+.catalog-page {
+  background: var(--la-fondo);
+  color: var(--la-texto);
+}
+
+.catalog-page .container {
+  max-width: 1200px;
+}
+
+/* =========================================================
+   Encabezado y mensajes informativos
+========================================================= */
+
+.catalog-page h1,
+.catalog-page h2,
+.catalog-page h3 {
+  color: var(--la-carbon);
+}
+
+.catalog-page .alert {
+  border-color: var(--la-linea);
+  background: var(--la-blanco);
+}
+
+/* =========================================================
+   Panel de filtros
+   En desktop queda lateral; en móvil debe verse limpio y simple
+========================================================= */
+
+.catalog-filter-card {
+  background: var(--la-blanco);
+  border: 1px solid var(--la-linea);
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.06);
+  top: 1.5rem;
+}
+
+.catalog-filter-card .form-label {
+  color: var(--la-carbon);
+}
+
+.catalog-filter-card .form-control,
+.catalog-filter-card .form-select {
+  min-height: 44px;
+  border-color: #D0D5DD;
+  border-radius: 12px;
+  color: var(--la-carbon);
+}
+
+.catalog-filter-card .form-control:focus,
+.catalog-filter-card .form-select:focus {
+  border-color: var(--la-rosa);
+  box-shadow: 0 0 0 0.2rem rgba(245, 125, 165, 0.15);
+}
+
+.catalog-filter-card .input-group-text {
+  border-color: #D0D5DD;
+  border-radius: 12px 0 0 12px;
+  color: var(--la-secundario);
+}
+
+/* Botones del catálogo */
+.catalog-page .btn-primary {
+  background: var(--la-rosa);
+  border-color: var(--la-rosa);
+}
+
+.catalog-page .btn-primary:hover,
+.catalog-page .btn-primary:focus {
+  background: var(--la-rosa-hover);
+  border-color: var(--la-rosa-hover);
+}
+
+.catalog-page .btn-outline-secondary {
+  border-color: var(--la-linea);
+  color: var(--la-carbon);
+  background: var(--la-blanco);
+}
+
+.catalog-page .btn-outline-secondary:hover {
+  background: var(--la-fondo);
+  color: var(--la-carbon);
+  border-color: var(--la-linea);
+}
+
+/* =========================================================
+   Cards de categorías
+   Sirven como apoyo visual y siguen el color del Design System
+========================================================= */
+
+.catalog-category-card {
+  border: 1px solid var(--la-linea);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.catalog-category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.10);
+  border-color: rgba(245, 125, 165, 0.25);
+}
+
+.category-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  flex: 0 0 56px;
+}
+
+/* Fondos suaves por categoría */
+.category-cosmeticos {
+  background: linear-gradient(135deg, rgba(245, 125, 165, 0.12), rgba(253, 231, 240, 0.85));
+}
+
+.category-juguetes {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.10), rgba(234, 243, 255, 0.90));
+}
+
+.category-flores {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.10), rgba(234, 248, 239, 0.90));
+}
+
+.category-cosmeticos .category-icon {
+  background: rgba(245, 125, 165, 0.18);
+  color: var(--la-cosmeticos);
+}
+
+.category-juguetes .category-icon {
+  background: rgba(59, 130, 246, 0.18);
+  color: var(--la-juguetes);
+}
+
+.category-flores .category-icon {
+  background: rgba(34, 197, 94, 0.18);
+  color: var(--la-flores);
+}
+
+/* =========================================================
+   Cards de producto
+   Cada card presenta información pública permitida
+========================================================= */
+
+.product-card {
+  border: 1px solid var(--la-linea);
+  background: var(--la-blanco);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.10);
+  border-color: rgba(245, 125, 165, 0.22);
+}
+
+.product-visual {
+  height: 300px;
+  background: var(--la-fondo);
+  border-bottom: 1px solid var(--la-linea);
+  overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    object-position: center;
+
+    display: block;
+
+    padding: 8px;
+}
+
+.product-placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  color: var(--la-secundario);
+  background: linear-gradient(135deg, rgba(245, 125, 165, 0.06), rgba(17, 24, 39, 0.02));
+}
+
+.product-status {
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+/* =========================================================
+   Ajustes de alineación para las cards
+========================================================= */
+
+.product-card__content {
+    flex: 1 1 auto;
+}
+
+.product-title {
+    min-height: 3rem;
+}
+
+.product-price {
+    white-space: nowrap;
+}
+
+.product-presentation {
+    min-height: 2.5rem;
+}
+
+/* =========================================================
+   Estado vacío
+========================================================= */
+
+.empty-state-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.75rem;
+  background: rgba(245, 125, 165, 0.12);
+  color: var(--la-rosa);
+}
+
+/* =========================================================
+   Ajustes responsive
+========================================================= */
+
+@media (max-width: 991.98px) {
+  .catalog-filter-card {
+    position: relative !important;
+    top: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .catalog-page {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .catalog-filter-card {
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
+  }
+
+  .product-visual {
+    height: 200px;
+  }
+}
+
+/* ==========================================================
+   DETALLE DEL PRODUCTO
+   ========================================================== */
+
+.product-detail-page {
+    background: #f7f8fa;
+}
+
+.product-detail-image-card,
+.product-detail-content {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.04);
+}
+
+.product-detail-image-card {
+    padding: 1rem;
+}
+
+.product-detail-image {
+    width: 100%;
+    max-height: 640px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+}
+
+.product-detail-content {
+    padding: 1.5rem;
+}
+
+.product-detail-title {
+    font-size: 2rem;
+    line-height: 1.15;
+    font-weight: 700;
+    color: #111827;
+}
+
+.product-detail-code {
+    color: #6b7280;
+    font-size: 0.98rem;
+}
+
+.product-detail-price-box {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.9rem;
+    padding: 1rem 1.1rem;
+}
+
+.product-detail-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.product-detail-price {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #f57da5;
+}
+
+.product-detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.product-detail-info-item,
+.product-detail-brand,
+.product-detail-description {
+    background: #ffffff;
+}
+
+.product-detail-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.product-detail-description p {
+    color: #374151;
+    line-height: 1.7;
+}
+
+.product-detail-actions .btn {
+    min-width: 180px;
+    border-radius: 0.75rem;
+    padding: 0.8rem 1.2rem;
+    font-weight: 600;
+}
+
+.product-detail-note {
+    color: #6b7280;
+    font-size: 0.92rem;
+}
+
+/* Badges del detalle */
+.product-detail-page .badge {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.product-detail-page .category-badge {
+    background: #fde7f0;
+    color: #111827;
+}
+
+.product-detail-page .availability-disponible {
+    background: #eaf7ef;
+    color: #198754;
+}
+
+.product-detail-page .availability-baja-disponibilidad {
+    background: #fff7e6;
+    color: #b45309;
+}
+
+.product-detail-page .availability-agotado {
+    background: #fdecec;
+    color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .product-detail-content {
+        padding: 1.25rem;
+    }
+
+    .product-detail-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-detail-title {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .product-detail-image-card,
+    .product-detail-content {
+        border-radius: 0.85rem;
+    }
+
+    .product-detail-actions .btn {
+        width: 100%;
+        min-width: 0;
+    }
+}
+/* ==========================================================
+   LOGIN INTERNO
+   Tarjeta centrada de máximo 420px según el Design System.
+   ========================================================== */
+
+.login-page {
+    min-height: calc(100vh - 220px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    background-color: var(--la-bg);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--la-surface);
+    border: 1px solid var(--la-border);
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+    padding: 2rem;
+}
+
+.login-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin-bottom: 0.25rem;
+}
+
+.login-subtitle {
+    color: var(--la-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-card .form-control {
+    border-radius: 0.625rem;
+    min-height: 44px; /* objetivo táctil mínimo (accesibilidad) */
+}
+
+.login-card .form-control:focus {
+    border-color: var(--la-brand);
+    box-shadow: 0 0 0 0.2rem var(--la-focus-ring);
+}
+
+.login-submit {
+    min-height: 44px;
+    border-radius: 0.75rem;
+    font-weight: 600;
+}
+
+.login-note {
+    font-size: 0.85rem;
+}
+
+/* Badge del rol en el panel administrativo */
+.admin-role-badge {
+    background-color: var(--la-brand-soft);
+    color: var(--la-brand-active);
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+@media (max-width: 575.98px) {
+    .login-page {
+        padding: 2rem 1rem;
+        align-items: flex-start;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+    }
+}
+
+/* Nivel "baja" del catálogo real (Sprint 6.1): mismo estilo que la
+   clase original de baja disponibilidad del Design System */
+.product-detail-page .availability-baja {
+    background: #fff7e6;
+    color: #b45309;
+}
+
+/* Páginas de error (Fase 7) */
+.error-page {
+    max-width: 480px;
+}
+
+.error-page__code {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--la-brand);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}

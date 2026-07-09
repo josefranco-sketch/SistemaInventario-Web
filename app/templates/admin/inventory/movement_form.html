@@ -1,0 +1,80 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Movimiento de inventario | Los Altos{% endblock %}
+{% block page_title %}Registrar movimiento{% endblock %}
+
+{% block admin_content %}
+<!--
+===============================================================================
+REGISTRO DE MOVIMIENTO DE INVENTARIO (entrada / salida)
+
+Cada movimiento exige motivo y queda en el historial con el usuario y la
+fecha (regla ADR, sin excepción). Una salida nunca puede dejar el stock
+en negativo: el servicio la rechaza si no hay existencia suficiente.
+===============================================================================
+-->
+<div class="container-xl">
+  <div class="card shadow-sm admin-form-card">
+    <div class="card-body p-4">
+
+      {# Resumen del producto al que pertenece el movimiento #}
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+        <div>
+          <p class="mb-0 fw-semibold">{{ product.name }}</p>
+          <small class="text-muted">
+            {{ product.code }} · {{ product.category.name }} / {{ product.subcategory.name }}
+          </small>
+        </div>
+        <div class="ms-auto text-end">
+          <p class="mb-0"><strong>Stock actual: {{ current_stock }}</strong></p>
+          <small class="text-muted">Umbral de bajo stock: {{ threshold }}</small>
+        </div>
+      </div>
+
+      <form method="post" novalidate>
+        {{ form.csrf_token }}
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            {{ form.movement_type.label(class="form-label fw-semibold") }}
+            {{ form.movement_type(class="form-select" + (" is-invalid" if form.movement_type.errors else "")) }}
+            {% for error in form.movement_type.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-4">
+            {{ form.quantity.label(class="form-label fw-semibold") }}
+            {{ form.quantity(class="form-control" + (" is-invalid" if form.quantity.errors else ""), min=1, placeholder="0") }}
+            {% for error in form.quantity.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12">
+            {{ form.reason.label(class="form-label fw-semibold") }}
+            {{ form.reason(class="form-control" + (" is-invalid" if form.reason.errors else ""), placeholder="Ej. Ingreso de contenedor, conteo físico, producto dañado…") }}
+            {% for error in form.reason.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+            <small class="text-muted">
+              El motivo es obligatorio: queda en el historial junto con tu
+              usuario y la fecha.
+            </small>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <button type="submit" class="btn btn-primary">Registrar movimiento</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.inventory_list') }}">Cancelar</a>
+          <a class="btn btn-link text-decoration-none"
+             href="{{ url_for('admin.inventory_movements', product=product.id) }}">
+            Ver historial de este producto
+          </a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

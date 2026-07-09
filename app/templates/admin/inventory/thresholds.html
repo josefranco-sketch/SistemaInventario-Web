@@ -1,0 +1,63 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Umbrales de bajo stock | Los Altos{% endblock %}
+{% block page_title %}Umbrales de bajo stock{% endblock %}
+
+{% block admin_content %}
+<!--
+===============================================================================
+CONFIGURACIÓN DE UMBRAL DE BAJO STOCK POR SUBCATEGORÍA
+
+Regla ADR: el umbral de bajo stock es configurable por subcategoría, no
+global. Un producto con stock entre 1 y el umbral de su subcategoría se
+muestra públicamente como "Baja disponibilidad".
+===============================================================================
+-->
+<div class="container-xl">
+  <div class="card shadow-sm admin-form-card">
+    <div class="card-body p-4">
+
+      <p class="text-muted">
+        Cuando el stock de un producto queda entre 1 y el umbral de su
+        subcategoría, el catálogo público lo muestra como
+        <span class="badge availability-badge availability-badge--baja">Baja disponibilidad</span>.
+        Con stock 0 se muestra
+        <span class="badge availability-badge availability-badge--agotado">Agotado</span>.
+      </p>
+
+      <form method="post" novalidate>
+        {{ form.csrf_token }}
+
+        {% for category in categories %}
+          <h2 class="admin-section-title mt-4">
+            <span class="badge category-chip category-chip--{{ category.slug }}">{{ category.name }}</span>
+          </h2>
+
+          <div class="row g-3">
+            {% for subcategory in category.subcategories %}
+              <div class="col-6 col-md-4">
+                <label class="form-label fw-semibold" for="threshold-{{ subcategory.id }}">
+                  {{ subcategory.name }}
+                </label>
+                <input type="number"
+                       class="form-control"
+                       id="threshold-{{ subcategory.id }}"
+                       name="threshold-{{ subcategory.id }}"
+                       value="{{ subcategory.low_stock_threshold }}"
+                       min="0"
+                       required>
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <button type="submit" class="btn btn-primary">Guardar umbrales</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.inventory_list') }}">Cancelar</a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Cotización | Los Altos{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-5 fw-bold">Cotización</h1>
+            <p class="text-muted mb-0">
+                Completa los datos del cliente y revisa los productos seleccionados antes de continuar.
+            </p>
+        </div>
+    </div>
+
+    {# Confirmación al enviar la cotización (incluye su código de seguimiento) #}
+    {% if quote.success_message is defined and quote.success_message %}
+        <div class="alert alert-success" role="alert">
+            {{ quote.success_message }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('quotes.quote_home') }}">
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="mb-3">Datos del cliente</h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                               <label class="form-label fw-semibold">Nombre</label>
+
+                                <input
+                                    type="text"
+                                    name="customer_name"
+                                    class="form-control"
+                                    value="{{ quote['customer_name'] }}"
+                                    placeholder="Nombre del cliente"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Teléfono</label>
+                                <input type="text" name="customer_phone" class="form-control" value="{{ quote['customer_phone'] }}" placeholder="Teléfono del cliente">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Correo electrónico</label>
+                                <input type="email" name="customer_email" class="form-control" value="{{ quote['customer_email'] }}" placeholder="Correo del cliente">
+                            </div>
+                        </div>
+
+                                                <div class="d-flex flex-wrap gap-2 mt-4">
+                            <button type="submit" class="btn btn-outline-secondary">
+                                Actualizar cotización
+                            </button>
+
+                            <a href="{{ url_for('quotes.quote_home', clear=1) }}" class="btn btn-outline-danger">
+                                Vaciar cotización
+                            </a>
+
+                            <a href="{{ url_for('public.catalog') }}" class="btn btn-link text-decoration-none">
+                                Seguir agregando productos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="mb-3">Resumen</h4>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Número</span>
+                            <strong>{{ quote['code'] }}</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <span>Subtotal</span>
+                            <strong>Q {{ "%.2f"|format(quote['subtotal']) }}</strong>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between fs-5">
+                            <span>Total</span>
+                            <strong>Q {{ "%.2f"|format(quote['total']) }}</strong>
+                        </div>
+
+                        <button class="btn btn-primary w-100 mt-4" type="submit">
+    Solicitar cotización
+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Productos seleccionados</h4>
+                    <span class="badge text-bg-light">{{ quote['items']|length }} item(s)</span>
+                </div>
+
+                {% if quote['items'] %}
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Subtotal</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in quote['items'] %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">{{ item.name }}</div>
+                                        <small class="text-muted">{{ item.code }}</small>
+                                    </td>
+                                   <td>{{ item.quantity }}</td>
+
+<td class="text-end">
+    Q {{ "%.2f"|format(item.price) }}
+</td>
+
+<td class="text-end">
+    Q {{ "%.2f"|format(item.subtotal) }}
+</td>
+
+<td class="text-center">
+    <a href="{{ url_for('quotes.quote_home', remove=item.code) }}"
+       class="btn btn-sm btn-outline-danger">
+        Eliminar
+    </a>
+</td>
+
+</tr>
+{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <h5 class="mb-2">Aún no hay productos agregados</h5>
+                        <p class="text-muted mb-0">
+                            Ve al detalle de un producto y usa “Agregar a cotización”.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

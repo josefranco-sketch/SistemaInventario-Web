@@ -1,0 +1,97 @@
+{% extends "admin/base_admin.html" %}
+
+{% if user %}
+  {% set page_name = "Editar usuario" %}
+{% else %}
+  {% set page_name = "Nuevo usuario" %}
+{% endif %}
+
+{% block title %}{{ page_name }} | Los Altos{% endblock %}
+{% block page_title %}{{ page_name }}{% endblock %}
+
+{% block admin_content %}
+<!--
+===============================================================================
+FORMULARIO DE USUARIO INTERNO (crear / editar)
+
+En creación la contraseña es obligatoria (con confirmación). En edición
+es opcional: en blanco se conserva la actual. La contraseña existente
+jamás se muestra ni se precarga (solo existe su hash en la base).
+===============================================================================
+-->
+
+{% macro render_field(field, placeholder="", autocomplete="off") %}
+  <div>
+    {{ field.label(class="form-label fw-semibold") }}
+    {{ field(class="form-control" + (" is-invalid" if field.errors else ""), placeholder=placeholder, autocomplete=autocomplete) }}
+    {% for error in field.errors %}
+      <div class="invalid-feedback">{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+<div class="container-xl">
+  <div class="card shadow-sm admin-form-card">
+    <div class="card-body p-4">
+
+      {% if user %}
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+          <p class="text-muted mb-0">
+            Editando a <strong>{{ user.username }}</strong>
+          </p>
+          {% if user.id == current_user.id %}
+            <small class="text-muted ms-auto">
+              Es tu propio usuario: no puedes cambiarte el rol ni desactivarte.
+            </small>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {{ form.csrf_token }}
+
+        <div class="row g-3">
+          <div class="col-md-5">
+            {{ render_field(form.username, "Ej. mlopez", "username") }}
+          </div>
+          <div class="col-md-7">
+            {{ render_field(form.full_name, "Nombre y apellido") }}
+          </div>
+
+          <div class="col-md-5">
+            {{ form.role.label(class="form-label fw-semibold") }}
+            {{ form.role(class="form-select" + (" is-invalid" if form.role.errors else "")) }}
+            {% for error in form.role.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+            <small class="text-muted">
+              El vendedor usará el sistema de ventas (Fase 5); el
+              administrador tiene acceso a todo el panel.
+            </small>
+          </div>
+
+          <div class="col-md-6">
+            {{ render_field(form.password, "Mínimo 6 caracteres", "new-password") }}
+            {% if user %}
+              <small class="text-muted">Déjala en blanco para conservar la actual.</small>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            {{ render_field(form.confirm_password, "Repite la contraseña", "new-password") }}
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-4">
+          <button type="submit" class="btn btn-primary">
+            {% if user %}Guardar cambios{% else %}Crear usuario{% endif %}
+          </button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.users_list') }}">
+            Cancelar
+          </a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
