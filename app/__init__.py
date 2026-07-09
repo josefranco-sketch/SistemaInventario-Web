@@ -1,4 +1,4 @@
-from flask import Flask #importamos de flask la libreria Flask
+from flask import Flask, render_template #importamos de flask la libreria Flask
 from config import Config # Trae la configuración central
 from app.extensions import db, login_manager
 from app.models.user import User # Modelo de usuarios internos (admin/vendedor)
@@ -35,6 +35,20 @@ def create_app (): #creamos la def create_app para que run.py pueda leer y ejecu
     app.register_blueprint(auth_bp)
     app.register_blueprint(quotes_bp)
     app.register_blueprint(sales_bp)
+
+    # Páginas de error propias (Fase 7): amigables y con la
+    # navegación del sitio, en lugar de las páginas por defecto.
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        return render_template("errors/403.html"), 403
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return render_template("errors/500.html"), 500
 
     # Crea las tablas en la base de datos si todavía no existen
     with app.app_context():
