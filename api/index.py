@@ -15,8 +15,16 @@
 # ==========================================================
 import os
 import shutil
+import sys
 
-DEMO_DB = os.path.join(os.path.dirname(__file__), "..", "deploy", "demo_app.db")
+# Raíz del proyecto (un nivel arriba de api/). Se agrega a sys.path
+# para que "from app import create_app" y "from config import Config"
+# funcionen también dentro de la función serverless de Vercel.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
+DEMO_DB = os.path.join(ROOT, "deploy", "demo_app.db")
 RUNTIME_DB = "/tmp/app.db"
 
 if os.environ.get("VERCEL") and not os.path.exists(RUNTIME_DB):
