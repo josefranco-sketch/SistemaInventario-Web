@@ -1989,3 +1989,70 @@ admin funcionando y verify_integration 9/9 en el clon.
 **Enlace**
 
 https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/final-documentation?expand=1
+
+# PR #23 – Vercel Deploy Setup (Sprint 8.2)
+
+## Información general
+
+**Fase:** 8 – Deploy y Entrega · **Sprint:** 8.2 – Deploy en Vercel
+**Branch:** feature/vercel-deploy · **Estado:** 🔍 En revisión
+
+---
+
+## Trabajo realizado
+
+- Estrategia de demo para Vercel (el filesystem serverless es de SOLO
+  lectura, y SQLite necesita escribir): el repo incluye una base de
+  demostración (deploy/demo_app.db, generada con build_demo_db.py) que
+  api/index.py copia a /tmp — escribible pero temporal — en cada
+  arranque en frío. La demo funciona completa (catálogo, cotizaciones,
+  login, ventas, pagos) y se restaura sola al reiniciarse la función.
+- api/index.py (punto de entrada serverless) + vercel.json (rewrite de
+  todas las rutas a la función).
+- config.py: base de datos según entorno — local usa instance/app.db
+  como siempre; VERCEL usa /tmp/app.db; DATABASE_URL permite otra ruta
+  (lo usa build_demo_db.py).
+- build_demo_db.py: genera la base de demo desde cero reutilizando los
+  seeds (usuarios admin/admin123 y vendedor/venta123, catálogo inicial
+  y stock con historial de movimientos: labial 20 disponible, juguete
+  15 disponible, tulipán 3 en baja disponibilidad).
+- Excepción en .gitignore para versionar deploy/demo_app.db.
+- Subida de imágenes protegida: en filesystem de solo lectura el
+  producto se guarda sin imagen en lugar de fallar con error 500
+  (limitación documentada: imágenes solo en local).
+- README: sección de demo en línea con la explicación del modo
+  demostración (URL pendiente de pegar tras el primer deploy).
+
+---
+
+## Pruebas realizadas
+
+Simulación local del entorno Vercel (VERCEL=1):
+- La base de demo se copia a /tmp en el arranque (90 KB).
+- Catálogo con los productos de demostración y disponibilidad correcta
+  (tulipán en Baja disponibilidad con stock 3 / umbral 5).
+- Login de los dos usuarios de demo y panel admin operativo.
+- La escritura funciona en /tmp (producto creado vía HTTP).
+- El "arranque en frío" restaura la demo (el producto de prueba
+  desapareció y los datos originales volvieron).
+- Modo local intacto: run.py sigue usando instance/app.db con los datos
+  reales del usuario, y verify_integration.py pasó 9/9.
+
+---
+
+## Pull Request
+
+**PR:** #23
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/vercel-deploy?expand=1
+
+---
+
+## Observaciones
+
+El deploy en sí lo ejecuta el usuario desde el dashboard de Vercel (la
+cuenta es suya); los pasos quedan documentados en el cierre del sprint.
+Tras el primer deploy: pegar la URL en el README (cierre del 8.2) y
+configurar SECRET_KEY como variable de entorno.
