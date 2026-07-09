@@ -10,13 +10,16 @@ from flask_login import current_user, login_required
 
 from app.blueprints.admin import admin_bp
 from app.blueprints.admin.forms import (
+    ConfirmActionForm,
     MovementForm,
     ProductForm,
     StatusChangeForm,
     ThresholdsForm,
+    UserCreateForm,
+    UserEditForm,
 )
 from app.blueprints.auth.decorators import admin_required
-from app.services import inventory_service, products_service
+from app.services import inventory_service, products_service, users_service
 from app.services.dashboard_service import get_dashboard_summary
 
 
@@ -232,3 +235,89 @@ def inventory_thresholds():
         categories=inventory_service.get_subcategories_grouped(),
         form=form,
     )
+
+
+# ----------------------------------------------------------
+# Usuarios internos
+# ----------------------------------------------------------
+
+@admin_bp.route("/users")
+@login_required
+@admin_required
+def users_list():
+    search = request.args.get("q", "").strip()
+    role = request.args.get("role", "").strip()
+
+    users = users_service.list_users(search=search, role=role)
+
+    return render_template(
+        "admin/users/list.html",
+        users=users,
+        search=search,
+        selected_role=role,
+        role_labels=users_service.ROLE_LABELS,
+        toggle_form=ConfirmActionForm(),
+    )
+
+
+@admin_bp.route("/users/new", methods=["GET", "POST"])
+@login_required
+@admin_required
+def user_new():
+    form = UserCreateForm()
+
+    if form.validate_on_submit():
+        user, error = users_service.create_user(form)
+
+        if error:
+            form.username.errors.append(error)
+        else:
+            flash(f"Usuario '{user.username}' creado correctamente.", "success")
+            return redirect(url_for("admin.users_list"))
+
+    return render_template("admin/users/form.html", form=form, user=None)
+
+
+@admin_bp.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def user_edit(user_id):
+    user = users_service.get_user_or_none(user_id)
+    if user is None:
+        flash("El usuario no existe.", "danger")
+        return redirect(url_for("admin.users_list"))
+
+    # obj=user precarga usuario, nombre y rol; los campos de
+    # contraseña son PasswordField y nunca se precargan.
+    form = UserEditForm(obj=user)
+
+    if form.validate_on_submit():
+        updated, error = users_service.update_user(user, form, current_user)
+
+        if error:
+            form.username.errors.append(error)
+        else:
+            flash(f"Usuario '{updated.username}' actualizado.", "success")
+            return redirect(url_for("admin.users_list"))
+
+    return render_template("admin/users/form.html", form=form, user=user)
+
+
+@admin_bp.route("/users/<int:user_id>/toggle", methods=["POST"])
+@login_required
+@admin_required
+def user_toggle(user_id):
+    user = users_service.get_user_or_none(user_id)
+    if user is None:
+        flash("El usuario no existe.", "danger")
+        return redirect(url_for("admin.users_list"))
+
+    form = ConfirmActionForm()
+
+    if form.validate_on_submit():
+        ok, message = users_service.toggle_active(user, current_user)
+        flash(message, "success" if ok else "warning")
+    else:
+        flash("No se pudo cambiar el estado del usuario.", "danger")
+
+    return redirect(url_for("admin.users_list"))

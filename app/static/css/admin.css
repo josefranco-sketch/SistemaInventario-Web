@@ -429,3 +429,17 @@ a.shortcut-card:hover {
 
 .movement-badge--entrada { background-color: var(--la-success-soft); color: var(--la-success); }
 .movement-badge--salida  { background-color: var(--la-warning-soft); color: #B45309; }
+
+/* --------------------------------------------------------------
+   9. Módulo de Usuarios
+   -------------------------------------------------------------- */
+
+/* Badges de rol (texto + color, nunca color solo) */
+.role-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.4rem 0.6rem;
+}
+
+.role-badge--admin    { background-color: var(--la-brand-soft); color: var(--la-brand-active); }
+.role-badge--vendedor { background-color: var(--la-info-soft); color: var(--la-info); }
