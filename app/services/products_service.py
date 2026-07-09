@@ -171,6 +171,8 @@ def update_product(product, form):
     if code_already_exists(code, exclude_id=product.id):
         return None, f"El código {code} ya está usado por otro producto."
 
+    subcategory_changed = product.subcategory_id != form.subcategory_id.data
+
     product.code = code
     product.name = form.name.data.strip()
     product.description = _clean_optional(form.description.data)
@@ -181,6 +183,19 @@ def update_product(product, form):
     product.commercial_unit = form.commercial_unit.data
     # La disponibilidad pública ya no se edita a mano: la calcula el
     # inventario según stock y umbral de la subcategoría (Sprint 4.4).
+
+    if subcategory_changed:
+        # Cambiar de subcategoría puede cambiar el umbral de bajo
+        # stock, así que la disponibilidad pública se recalcula
+        # (brecha detectada y corregida en el Sprint 6.3).
+        # Se asigna la RELACIÓN (no solo el id) para que el umbral
+        # nuevo esté disponible de inmediato en el recálculo.
+        from app.services import inventory_service
+
+        product.subcategory = db.session.get(
+            Subcategory, form.subcategory_id.data
+        )
+        inventory_service.refresh_availability(product)
 
     # Solo se reemplaza la imagen si el admin subió un archivo nuevo;
     # si no sube nada, se conserva la imagen actual.

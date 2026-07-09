@@ -1590,3 +1590,111 @@ conversión), ciclos for (persistencia y conversión por renglón), listas
 y diccionarios (estado de sesión → modelos), funciones con parámetros y
 return, modularidad (quotes_service compone products/orders) y librería
 estándar (datetime, decimal).
+
+# PR #18 – Integration: Sales → Inventory → Public Availability (Sprint 6.3)
+
+## Información general
+
+**Fase**
+
+6 – Integración
+
+**Sprint**
+
+6.3 – Integración Ventas → Inventario → Disponibilidad Pública
+
+**Branch**
+
+feature/integration-sales-inventory
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Verificar y completar el flujo de inventario después de una venta
+pagada: descuento único, historial, disponibilidad pública recalculada y
+reflejada en el catálogo, sin descuentos por cotizaciones ni pendientes.
+
+---
+
+## Trabajo realizado
+
+- Script de consola `verify_integration.py`: verificación REPETIBLE del
+  ciclo completo con 9 reglas del ADR. Crea sus propios datos de prueba
+  (producto, pedidos, cotización), valida cada regla y limpia todo al
+  terminar — la base queda intacta y puede correrse cuantas veces se
+  quiera (útil también para la Fase 7 y antes del deploy):
+  1. Producto nuevo nace Agotado. 2. Entrada → Disponible.
+  3. Pedido pendiente no descuenta. 4. Pagar descuenta una vez con
+  movimiento "venta". 5. Disponibilidad recalculada al pagar.
+  6. Doble pago rechazado. 7. Pago sin stock rechazado sin descontar
+  nada. 8. Cotización y su conversión no descuentan. 9. Limpieza.
+- BRECHA detectada y corregida: al editar un producto y cambiarlo de
+  subcategoría, el umbral de bajo stock cambia pero la disponibilidad
+  pública no se recalculaba (badge desactualizado hasta el siguiente
+  movimiento). products_service.update_product ahora reasigna la
+  relación de subcategoría y recalcula la disponibilidad de inmediato.
+  (El primer intento del fix falló en la prueba —asignar solo el id no
+  actualiza la relación en memoria— y se corrigió asignando la
+  relación; ambas variantes quedaron probadas.)
+- Verificación EN VIVO con los datos reales del sistema:
+  - El catálogo público mostraba el tulipán Agotado.
+  - Pagar el PED-0009 (convertido de la cotización de Ana Pérez en el
+    6.2, con tulipanes sin stock) fue RECHAZADO con el mensaje "Stock
+    insuficiente para MES2655-2: hay 0... No se descontó nada" y el
+    pedido siguió Pendiente.
+  - El admin registró una entrada de 12 tulipanes → el catálogo público
+    pasó a Disponible de inmediato.
+  - El segundo intento de pago descontó ambos renglones (juguete 12→9,
+    tulipán 12→9), dejó los 2 movimientos "venta" en el historial y el
+    catálogo reflejó el estado final sin exponer cantidades.
+
+---
+
+## Archivos principales
+
+- verify_integration.py (nuevo)
+- app/services/products_service.py (fix disponibilidad al cambiar
+  subcategoría)
+
+---
+
+## Pruebas realizadas
+
+- verify_integration.py: 9/9 verificaciones correctas (dos corridas,
+  demostrando que es repetible y que limpia la base).
+- Flujo en vivo por HTTP con la sesión del vendedor y del admin (pago
+  rechazado por stock → reabastecimiento → pago exitoso → catálogo
+  actualizado), descrito arriba.
+- Fix de subcategoría probado en ambos sentidos (umbral mayor → baja;
+  regreso → disponible).
+- Historial con los movimientos de la venta verificado a nivel de datos.
+- Log sin errores.
+
+---
+
+## Pull Request
+
+**PR:** #18
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/integration-sales-inventory?expand=1
+
+---
+
+## Observaciones
+
+Este sprint confirma que las reglas más importantes del ADR funcionan
+integradas de punta a punta con datos reales. verify_integration.py
+queda como herramienta de regresión para la Fase 7 y el deploy.
+
+Temas de la Sección 02 (rúbrica UFM): el script de verificación usa
+funciones propias con parámetros y return (check, build_order, cleanup),
+listas de tuplas para acumular resultados, ciclos for para el resumen,
+condicionales para cada regla, entrada/salida por consola con print y
+modularidad (importa y compone 4 servicios del sistema).
