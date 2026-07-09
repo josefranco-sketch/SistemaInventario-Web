@@ -18,7 +18,7 @@ Consulta pública → Cotización → Pedido → Pago en tienda → Descuento de
 
 - Rama de trabajo real: **`dev`** (no `main`). `main` está congelado en un commit viejo ("Agrego archivo de prueba") y **no** refleja el avance — no te dejes engañar si haces `git checkout main`.
 - Trabaja siempre desde `dev`, ramificando `feature/*` desde ahí.
-- **Avance: Fases 1–7 completadas**. Siguiente paso: **Fase 8 — Deploy y Entrega** (README final → deploy en Vercel → presentación).
+- **PROYECTO COMPLETADO: las 8 fases terminadas.** Sistema publicado en https://sistema-inventario-web-josefranco-sketchs-projects.vercel.app (demo efímera). Guía de presentación en `PRESENTACION.md`. Si se retoma trabajo, es mantenimiento: mismas reglas de siempre (branch desde dev, PR, tracker).
 - Los 6 documentos fuente (PDF) están en la raíz del repo. Son la fuente de verdad; este CLAUDE.md es un resumen operativo, no un reemplazo.
 
 ## Reglas de negocio que NO se rompen
@@ -219,8 +219,8 @@ Conectar completamente Productos → Catálogo → Inventario → Cotizaciones �
 ### ✅ Fase 7 — Pruebas y Optimización (completada en una pasada: PR #20)
 Validación funcional, responsive, UX, corrección de errores, casos borde.
 
-### ⏳ Fase 8 — Deploy y Entrega (pendiente)
-Deploy (Vercel), README final, documentación, presentación, entrega.
+### ✅ Fase 8 — Deploy y Entrega (completada)
+README final (PR #22, verificado en clon fresco). Deploy en Vercel (PRs #23–#36): base de demo efímera copiada a /tmp en cada arranque en frío; lecciones duras documentadas en api/index.py — el builder exige `app` a nivel superior del entrypoint, y Vercel excluye del bundle cualquier carpeta llamada `public` (por eso el módulo público vive en `app/blueprints/site` y `app/templates/site`, con el blueprint aún llamado "public"). Cierre y guía de presentación en PRESENTACION.md.
 
 ## Pull Requests completados
 
@@ -246,6 +246,10 @@ Deploy (Vercel), README final, documentación, presentación, entrega.
 | 6.3 | PR #18 | feature/integration-sales-inventory |
 | 6.4 | PR #19 | feature/integration-end-to-end |
 | 7.1–7.3 | PR #20 | feature/final-quality-pass |
+| fix UI | PR #21 | feature/ui-fixes |
+| 8.1 | PR #22 | feature/final-documentation |
+| 8.2 | PRs #23–#36 | feature/vercel-* (deploy + depuración) y releases dev→main |
+| 8.3 | PR #37 | feature/final-delivery |
 
 ## Rúbrica académica — UFM Fundamentos de Programación (Proyecto Final)
 
@@ -316,4 +320,4 @@ Todo esto tiene que aparecer **bien usado** en el proyecto (no forzado):
 
 ## Próximo paso concreto
 
-Iniciar **Fase 8 — Deploy y Entrega**: Sprint 8.1 (README final, branch `feature/final-documentation`), Sprint 8.2 (deploy en Vercel, `feature/vercel-deploy` — ojo: filesystem de solo lectura, definir estrategia de datos/imágenes para la demo), Sprint 8.3 (presentación y cierre, `feature/final-delivery`; el guion de demo de 13 pasos está en la entrada del PR #19 del PR_tracker.md). Notas operativas: la BD vive en `instance/app.db` (gitignored); usuarios demo: admin/admin123 y vendedor/venta123; scripts útiles: `seed_admin.py`, `seed_catalog.py`, `migrate_payment_fields.py`, `verify_integration.py` (regresión 9/9). El sistema completo funciona end-to-end con datos reales; ya no existe `_get_demo_products()`.
+**Ninguno — proyecto entregado.** Pendiente del usuario: slides (máx. 6, propuesta en PRESENTACION.md) y ensayar la demo. Notas operativas por si se retoma: BD local en `instance/app.db` (gitignored); usuarios admin/admin123 y vendedor/venta123; scripts: `seed_admin.py`, `seed_catalog.py`, `build_demo_db.py` (regenera la demo del deploy), `migrate_payment_fields.py`, `verify_integration.py` (regresión 9/9, correr antes de cualquier cambio futuro).
