@@ -17,14 +17,16 @@
 # venta toca el inventario es mark_as_paid() (al final de este
 # archivo), y descuenta una sola vez por pedido.
 # ==========================================================
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.extensions import db
 from app.models.inventory import MOVEMENT_SALE
 from app.models.order import (
+    ORDER_CANCELLED,
     ORDER_DRAFT,
     ORDER_PAID,
     ORDER_PENDING,
+    ORDER_STATUSES,
     Order,
     OrderItem,
 )
@@ -71,6 +73,47 @@ def list_orders_by_seller(seller):
         .order_by(Order.created_at.desc())
         .all()
     )
+
+
+def list_orders(status="", seller_id=None, customer="", date_from=None, date_to=None):
+    """Historial de pedidos de la tienda con filtros simples.
+
+    Filtros: estado, vendedor, cliente (texto) y rango de fechas
+    (objetos date; el "hasta" es inclusivo). Todo el personal puede
+    consultar el historial de ventas de la tienda.
+    """
+    query = Order.query
+
+    if status in ORDER_STATUSES:
+        query = query.filter(Order.status == status)
+
+    if seller_id:
+        query = query.filter(Order.seller_id == seller_id)
+
+    if customer:
+        query = query.filter(Order.customer_name.ilike(f"%{customer}%"))
+
+    if date_from is not None:
+        query = query.filter(
+            Order.created_at >= datetime.combine(date_from, datetime.min.time())
+        )
+
+    if date_to is not None:
+        # Inclusivo: hasta el final del día indicado
+        end = datetime.combine(date_to, datetime.min.time()) + timedelta(days=1)
+        query = query.filter(Order.created_at < end)
+
+    return query.order_by(Order.created_at.desc()).all()
+
+
+def count_recent_orders(days=7):
+    """Pedidos (no borradores) creados en los últimos días, para el
+    indicador del dashboard."""
+    since = datetime.now() - timedelta(days=days)
+    return Order.query.filter(
+        Order.status != ORDER_DRAFT,
+        Order.created_at >= since,
+    ).count()
 
 
 def _find_item(order, product_id):
@@ -287,11 +330,52 @@ def mark_as_paid(order, user):
 
     # --- 4. Estado + trazabilidad, y confirmación única ---
     order.status = ORDER_PAID
-    order.paid_at = datetime.utcnow()
+    order.paid_at = datetime.now()
     order.paid_by_id = user.id
 
     db.session.commit()
     return True, (
         f"Pedido {order.code} pagado. Inventario descontado y "
         "disponibilidad pública actualizada."
+    )
+
+
+# ----------------------------------------------------------
+# Cancelación (Sprint 5.4) — sin romper historial
+# ----------------------------------------------------------
+
+def cancel_order(order, user):
+    """Cancela un borrador o un pedido pendiente de pago.
+
+    Reglas:
+    - Un pedido PAGADO no se cancela: su inventario ya se descontó
+      y el sistema no maneja reversos de pago (fuera de alcance).
+    - Solo el vendedor que lo creó o un administrador pueden
+      cancelarlo.
+    - El pedido y sus renglones se CONSERVAN (historial intacto);
+      solo cambia el estado. El inventario no se toca: un borrador
+      o pendiente nunca descontó nada.
+
+    Regresa (True/False, mensaje).
+    """
+    if order.status == ORDER_PAID:
+        return False, (
+            f"El pedido {order.code} ya está pagado y no puede cancelarse "
+            "(el inventario ya fue descontado)."
+        )
+
+    if order.status == ORDER_CANCELLED:
+        return False, f"El pedido {order.code} ya está cancelado."
+
+    if order.seller_id != user.id and not user.is_admin():
+        return False, (
+            "Solo el vendedor que creó el pedido o un administrador "
+            "pueden cancelarlo."
+        )
+
+    order.status = ORDER_CANCELLED
+    db.session.commit()
+    return True, (
+        f"Pedido {order.code} cancelado. El inventario no se tocó y el "
+        "pedido se conserva en el historial."
     )

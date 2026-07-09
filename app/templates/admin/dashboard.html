@@ -21,10 +21,9 @@ este template solo los presenta.
   {% if summary.demo_data %}
     <div class="alert alert-info alert-dismissible fade show" role="alert">
       <i class="bi bi-info-circle me-1"></i>
-      Los indicadores de cotizaciones y ventas muestran
-      <strong>datos de demostración</strong>; se conectarán a la base de datos
-      en las Fases 5 y 6. Los conteos de productos, bajo stock y usuarios
-      ya son reales.
+      El indicador de cotizaciones muestra <strong>datos de demostración</strong>;
+      se conectará en la Fase 6. Los demás indicadores (productos, bajo stock,
+      pedidos y usuarios) ya son reales.
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
     </div>
   {% endif %}
@@ -39,7 +38,7 @@ este template solo los presenta.
     {"label": "Productos activos", "icon": "bi-check-circle", "tone": "success", "value": summary.active_products},
     {"label": "Bajo stock", "icon": "bi-exclamation-triangle", "tone": "warning", "value": summary.low_stock},
     {"label": "Cotizaciones pendientes", "icon": "bi-file-earmark-text", "tone": "info", "value": summary.pending_quotes},
-    {"label": "Pedidos recientes", "icon": "bi-cart", "tone": "neutral", "value": summary.recent_orders},
+    {"label": "Pedidos (7 días)", "icon": "bi-cart", "tone": "neutral", "value": summary.recent_orders},
     {"label": "Usuarios internos", "icon": "bi-people", "tone": "neutral", "value": summary.total_users},
   ] %}
 
@@ -71,7 +70,6 @@ este template solo los presenta.
 
     {% set shortcuts = [
       {"title": "Cotizaciones", "icon": "bi-file-earmark-text", "text": "Solicitudes de cotización de clientes.", "soon": "Fase 6"},
-      {"title": "Ventas", "icon": "bi-cart", "text": "Pedidos, pagos y comprobantes internos.", "soon": "Fase 5"},
     ] %}
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
@@ -103,6 +101,16 @@ este template solo los presenta.
           <div>
             <p class="shortcut-card__title">Usuarios</p>
             <p class="shortcut-card__text">Administradores y vendedores del sistema.</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col">
+        <a class="shortcut-card" href="{{ url_for('sales.orders_list') }}">
+          <span class="shortcut-card__icon"><i class="bi bi-cart"></i></span>
+          <div>
+            <p class="shortcut-card__title">Ventas</p>
+            <p class="shortcut-card__text">Pedidos, pagos y comprobantes internos.</p>
           </div>
         </a>
       </div>

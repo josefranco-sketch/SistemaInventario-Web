@@ -59,9 +59,12 @@ class Order(db.Model):
     paid_by_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     paid_by = db.relationship("User", foreign_keys=[paid_by_id])
 
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    # Las fechas del sistema se guardan en hora local de la tienda
+    # (Guatemala, UTC-6 fijo): así los filtros por fecha y las horas
+    # mostradas coinciden con lo que ve el personal.
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now
     )
 
     items = db.relationship(
