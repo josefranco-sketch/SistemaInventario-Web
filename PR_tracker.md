@@ -2056,3 +2056,23 @@ El deploy en sí lo ejecuta el usuario desde el dashboard de Vercel (la
 cuenta es suya); los pasos quedan documentados en el cierre del sprint.
 Tras el primer deploy: pegar la URL en el README (cierre del 8.2) y
 configurar SECRET_KEY como variable de entorno.
+
+# PR #24 – Vercel Deploy Fix (Sprint 8.2)
+
+**Branch:** feature/vercel-deploy-fix · **Estado:** 🔍 En revisión
+
+El primer deploy tronó con "This Serverless Function has crashed". Causas
+típicas de Flask multi-paquete en Vercel, corregidas:
+
+1. api/index.py ahora agrega la raíz del proyecto a sys.path de forma
+   explícita (para que "from app import create_app" resuelva dentro de
+   la función serverless) y calcula la ruta de la base de demo desde esa
+   raíz absoluta.
+2. vercel.json cambió al formato builds/routes con includeFiles "**"
+   para garantizar que el bundle de la función incluya app/, deploy/ y
+   config.py (con "rewrites" el empaquetado no incluía todo).
+
+Verificado en simulación local (VERCEL=1 + test_client): home, catálogo,
+login y detalle en 200, base de demo copiada a /tmp.
+
+**Enlace:** https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/vercel-deploy-fix?expand=1
