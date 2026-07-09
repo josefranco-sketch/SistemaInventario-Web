@@ -2116,3 +2116,29 @@ https://sistema-inventario-web-josefranco-sketchs-projects.vercel.app
 - Base de demostración se restaura sola en cada arranque en frío
   (verificado: un producto creado en línea desapareció tras el reinicio).
 - Modo local intacto (instance/app.db) y verify_integration 9/9.
+
+# PR #37 – Final Delivery (Sprint 8.3) — CIERRE DEL PROYECTO
+
+**Fase:** 8 – Deploy y Entrega · **Sprint:** 8.3 – Presentación y Cierre
+**Branch:** feature/final-delivery · **Estado:** 🔍 En revisión (último PR)
+
+## Trabajo realizado
+
+- PRESENTACION.md: guía completa de entrega y defensa — datos clave,
+  estado final de las 8 fases, validación de las reglas de negocio,
+  guion de demo en vivo (~5 min) con plan B local, propuesta de 6
+  slides, preguntas probables con respuestas y rutas de código, y
+  checklist de entrega.
+- Validación final ejecutada: verify_integration 9/9 en local y
+  producción respondiendo (Home/catálogo/login 200, sin stock expuesto).
+- CLAUDE.md cerrado al estado final del proyecto.
+- main quedó actualizado con la versión final durante el 8.2 (PR #36).
+
+## Con este PR, el proyecto queda COMPLETADO
+
+8 fases · 37 Pull Requests · 3 módulos (público, administrativo,
+ventas) · reglas de negocio del ADR implementadas y verificadas
+automáticamente · publicado en Vercel · documentación completa
+(README, PR_tracker, PRESENTACION, CLAUDE.md).
+
+**Enlace:** https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/final-delivery?expand=1
