@@ -1149,3 +1149,16 @@ footer .text-muted {
     background: #fff7e6;
     color: #b45309;
 }
+
+/* Páginas de error (Fase 7) */
+.error-page {
+    max-width: 480px;
+}
+
+.error-page__code {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--la-brand);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}

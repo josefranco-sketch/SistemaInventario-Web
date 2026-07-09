@@ -24,7 +24,7 @@
 from app import create_app
 from app.extensions import db
 from app.models.inventory import Inventory, InventoryMovement
-from app.models.order import ORDER_DRAFT, Order
+from app.models.order import Order
 from app.models.product import Product
 from app.models.quote import Quote
 from app.models.user import User

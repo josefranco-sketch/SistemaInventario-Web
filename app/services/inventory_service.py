@@ -18,7 +18,6 @@ from app.extensions import db
 from app.models.category import Subcategory
 from app.models.inventory import (
     MOVEMENT_ENTRY,
-    MOVEMENT_EXIT,
     MOVEMENT_LABELS,
     MOVEMENT_TYPES,
     Inventory,

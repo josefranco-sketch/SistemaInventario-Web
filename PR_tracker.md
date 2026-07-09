@@ -302,6 +302,21 @@ Archivos modificados:
 
 link:
 https://github.com/josefranco-sketch/SistemaInventario-Web/pull/new/feature/product-detail
+
+# PR #6 – Public Quotation Module (Sprint 3.5) — entrada retroactiva
+
+> Nota: esta entrada se agregó retroactivamente durante la limpieza de la
+> Fase 7 (el PR #6 se mergeó en su momento sin registrarse aquí).
+
+**Fase:** 3 – Módulo Público · **Sprint:** 3.5 – Cotización
+**Branch:** feature/quote · **Estado:** ✅ Completado y mergeado en dev
+
+Resumen: blueprint `quotes` con la cotización pública vía Flask Session:
+agregar/incrementar/disminuir/eliminar productos, vaciar cotización,
+cálculo automático de subtotales y total, datos de cliente con
+validaciones HTML. Cerró la Fase 3 (flujo público completo con datos de
+prueba). En el Sprint 6.2 esta cotización se conectó a base de datos.
+
 # PR #7 – Admin Login (Sprint 4.1)
 
 ## Información general
@@ -1798,3 +1813,109 @@ Reglas verificadas en la corrida: producto único (fuente única), stock
 exacto oculto al público, cotización y pendiente sin descuento,
 descuento único al pagar con historial, disponibilidad derivada del
 inventario, comprobante sin valor fiscal.
+
+# PR #20 – Final Quality Pass (Sprints 7.1 + 7.2 + 7.3)
+
+## Información general
+
+**Fase**
+
+7 – Pruebas y Optimización
+
+**Sprint**
+
+7.1 Pruebas Funcionales + 7.2 Responsive/UX + 7.3 Limpieza Final
+(comprimidos en una sola pasada por decisión del usuario, para acelerar
+la llegada al deploy)
+
+**Branch**
+
+feature/final-quality-pass
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Validar los flujos principales, pulir la experiencia y dejar el proyecto
+limpio y listo para el deploy. Cierra la Fase 7.
+
+---
+
+## Trabajo realizado
+
+**7.1 – Pruebas funcionales**
+- verify_integration.py: 9/9 reglas del ADR verificadas de nuevo.
+- Barrido de rutas de los 3 módulos (públicas 200, internas protegidas,
+  sesiones admin y vendedor) con log limpio.
+- Caso borde corregido: las páginas de error eran las de Flask por
+  defecto. Se agregaron páginas propias 404/403/500 (amigables, con la
+  navegación del sitio y botones de regreso) registradas en create_app.
+
+**7.2 – Responsive y UX**
+- Enlaces muertos eliminados (8 href="#" que venían de la Fase 3):
+  navbar pública — "Categorías" ahora lleva al catálogo, el CTA
+  "Solicitar cotización" lleva a la cotización, y se retiraron
+  "Nosotros"/"Contacto" (no existen esas secciones); footer — Inicio,
+  Catálogo y Cotización enlazados de verdad (el contacto ya está visible
+  en su propia columna).
+- Confirmaciones de acciones importantes, estados vacíos y mensajes de
+  error ya venían implementados sprint a sprint; verificados.
+
+**7.3 – Limpieza final**
+- Eliminado Inventario.py de la raíz (el "archivo de prueba" con
+  print("Hola mundo") del primer commit del repo).
+- Imports sin uso eliminados (revisión con pyflakes; los imports de los
+  __init__ de blueprints/modelos son intencionales: registran rutas y
+  tablas).
+- Sin prints ni datos sensibles en app/; contraseñas solo como hash;
+  SECRET_KEY vía variable de entorno con default solo de desarrollo.
+- requirements.txt verificado contra los imports externos reales
+  (flask, flask_login, flask_sqlalchemy, flask_wtf, werkzeug, wtforms).
+- .gitignore verificado (.venv, __pycache__, .DS_Store, instance/, *.db).
+- README preliminar revisado (la reescritura final es el Sprint 8.1).
+- PR_tracker.md: agregada la entrada retroactiva del PR #6 (Sprint 3.5)
+  que faltaba desde la Fase 3.
+- CLAUDE.md actualizado al estado real del proyecto (Fases 1–7
+  completadas, tabla de PRs al día, notas operativas para el deploy).
+
+---
+
+## Archivos principales
+
+- app/templates/errors/{404,403,500}.html (nuevos)
+- app/__init__.py (manejadores de error)
+- app/templates/partials/{navbar,footer}.html (enlaces reales)
+- app/static/css/styles.css (estilos de páginas de error)
+- app/services/inventory_service.py, verify_integration.py (imports)
+- Inventario.py (eliminado)
+- CLAUDE.md, PR_tracker.md, README.md (documentación al día)
+
+---
+
+## Pruebas realizadas
+
+- verify_integration.py 9/9; barrido de rutas completo con sesiones;
+  páginas 404 propias servidas para producto y ruta inexistentes;
+  cero href="#" restantes en el sitio público; CTA de cotización
+  funcionando; log de Flask sin errores.
+
+---
+
+## Pull Request
+
+**PR:** #20
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/final-quality-pass?expand=1
+
+---
+
+## Observaciones
+
+Con esta pasada la **Fase 7 queda completada** y el proyecto está listo
+para la Fase 8 (README final → deploy en Vercel → presentación).

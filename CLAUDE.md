@@ -18,7 +18,7 @@ Consulta pública → Cotización → Pedido → Pago en tienda → Descuento de
 
 - Rama de trabajo real: **`dev`** (no `main`). `main` está congelado en un commit viejo ("Agrego archivo de prueba") y **no** refleja el avance — no te dejes engañar si haces `git checkout main`.
 - Trabaja siempre desde `dev`, ramificando `feature/*` desde ahí.
-- **Avance: Fases 1–3 completadas (~56%)**. Siguiente paso: **Fase 4 — Panel Administrativo**, empezando por Sprint 4.1 (Login).
+- **Avance: Fases 1–7 completadas**. Siguiente paso: **Fase 8 — Deploy y Entrega** (README final → deploy en Vercel → presentación).
 - Los 6 documentos fuente (PDF) están en la raíz del repo. Son la fuente de verdad; este CLAUDE.md es un resumen operativo, no un reemplazo.
 
 ## Reglas de negocio que NO se rompen
@@ -203,20 +203,20 @@ Se generaron los 6 documentos base del proyecto (los PDF en la raíz de este rep
 
 Flujo público terminado: `Home → Catálogo → Detalle → Cotización`, todo con datos de prueba hardcodeados (sin BD real todavía), sin mostrar stock exacto, sin descontar inventario.
 
-### ⏳ Fase 4 — Panel Administrativo (siguiente, pendiente)
+### ✅ Fase 4 — Panel Administrativo (completada)
 - Sprint 4.1 — Login Administrativo (`feature/admin-login`): Flask-Login real, login/logout, protección de rutas, roles, sesiones. (Ya existe el blueprint `auth` vacío y `login_manager` inicializado con `user_loader` que hoy retorna `None` — hay que implementarlo.)
 - Sprint 4.2 — Dashboard Administrativo (`feature/admin-dashboard`): KPIs, accesos rápidos, resumen general.
 - Sprint 4.3 — Gestión de Productos (`feature/admin-products`): CRUD productos, categorías, subcategorías, estados, imágenes, presentación comercial. **Aquí nace el modelo `Product` real en BD** — reemplaza `_get_demo_products()` de `public/routes.py`.
 - Sprint 4.4 — Inventario (`feature/admin-inventory`): existencias, movimientos, bajo stock, historial.
 - Sprint 4.5 — Usuarios (`feature/admin-users`): CRUD usuarios, roles, activación/desactivación.
 
-### ⏳ Fase 5 — Sistema de Ventas (pendiente)
+### ✅ Fase 5 — Sistema de Ventas (completada)
 Pedidos, pago, comprobantes, conversión Cotización → Pedido, descuento de inventario al pagar. Sprints previstos: 5.1 buscador vendedor, 5.2 nuevo pedido, 5.3 pago, 5.4 comprobante.
 
-### ⏳ Fase 6 — Integración (pendiente)
+### ✅ Fase 6 — Integración (completada)
 Conectar completamente Productos → Catálogo → Inventario → Cotizaciones → Ventas → Usuarios. Flujo esperado: Administrador → Productos → Catálogo → Cotización → Pedido → Pago → Inventario → Disponibilidad Pública.
 
-### ⏳ Fase 7 — Pruebas y Optimización (pendiente)
+### ✅ Fase 7 — Pruebas y Optimización (completada en una pasada: PR #20)
 Validación funcional, responsive, UX, corrección de errores, casos borde.
 
 ### ⏳ Fase 8 — Deploy y Entrega (pendiente)
@@ -232,6 +232,20 @@ Deploy (Vercel), README final, documentación, presentación, entrega.
 | 3.3 | PR #4 | feature/catalog |
 | 3.4 | PR #5 | feature/product-detail |
 | 3.5 | PR #6 | feature/quote |
+| 4.1 | PR #7 | feature/admin-login |
+| 4.2 | PR #8 | feature/admin-dashboard |
+| 4.3 | PR #9 | feature/admin-products |
+| 4.4 | PR #10 | feature/admin-inventory |
+| 4.5 | PR #11 | feature/admin-users |
+| 5.1 | PR #12 | feature/sales-panel |
+| 5.2 | PR #13 | feature/sales-orders |
+| 5.3 | PR #14 | feature/sales-payment |
+| 5.4 | PR #15 | feature/sales-receipts |
+| 6.1 | PR #16 | feature/integration-products-catalog |
+| 6.2 | PR #17 | feature/integration-quote-to-order |
+| 6.3 | PR #18 | feature/integration-sales-inventory |
+| 6.4 | PR #19 | feature/integration-end-to-end |
+| 7.1–7.3 | PR #20 | feature/final-quality-pass |
 
 ## Rúbrica académica — UFM Fundamentos de Programación (Proyecto Final)
 
@@ -302,4 +316,4 @@ Todo esto tiene que aparecer **bien usado** en el proyecto (no forzado):
 
 ## Próximo paso concreto
 
-Iniciar **Sprint 4.1 — Login Administrativo**: crear branch `feature/admin-login` desde `dev`, implementar modelo `User` (admin/vendedor), completar `auth_bp` con rutas de login/logout, implementar `user_loader` real en `app/__init__.py` (hoy retorna `None`), proteger rutas admin con `@login_required` y control de roles.
+Iniciar **Fase 8 — Deploy y Entrega**: Sprint 8.1 (README final, branch `feature/final-documentation`), Sprint 8.2 (deploy en Vercel, `feature/vercel-deploy` — ojo: filesystem de solo lectura, definir estrategia de datos/imágenes para la demo), Sprint 8.3 (presentación y cierre, `feature/final-delivery`; el guion de demo de 13 pasos está en la entrada del PR #19 del PR_tracker.md). Notas operativas: la BD vive en `instance/app.db` (gitignored); usuarios demo: admin/admin123 y vendedor/venta123; scripts útiles: `seed_admin.py`, `seed_catalog.py`, `migrate_payment_fields.py`, `verify_integration.py` (regresión 9/9). El sistema completo funciona end-to-end con datos reales; ya no existe `_get_demo_products()`.
