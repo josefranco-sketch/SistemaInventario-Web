@@ -11,7 +11,9 @@
 #    pero los cambios hechos en línea son TEMPORALES: cuando la
 #    función se reinicia, la demo vuelve a su estado inicial.
 #
-# La operación real del negocio es local (ver README).
+# MODO DIAGNÓSTICO TEMPORAL: si la aplicación truena al arrancar,
+# en lugar del error genérico de Vercel se muestra el traceback
+# real para poder corregirlo. Se retirará al cerrar el deploy.
 # ==========================================================
 import os
 import shutil
@@ -24,12 +26,39 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-DEMO_DB = os.path.join(ROOT, "deploy", "demo_app.db")
-RUNTIME_DB = "/tmp/app.db"
+try:
+    DEMO_DB = os.path.join(ROOT, "deploy", "demo_app.db")
+    RUNTIME_DB = "/tmp/app.db"
 
-if os.environ.get("VERCEL") and not os.path.exists(RUNTIME_DB):
-    shutil.copy(DEMO_DB, RUNTIME_DB)
+    if os.environ.get("VERCEL") and not os.path.exists(RUNTIME_DB):
+        shutil.copy(DEMO_DB, RUNTIME_DB)
 
-from app import create_app
+    from app import create_app
 
-app = create_app()
+    app = create_app()
+
+except Exception:
+    # --- diagnóstico temporal: exponer el error de arranque ---
+    # Fallback en WSGI puro (sin Flask ni ninguna dependencia), por si
+    # el problema fuera justamente que las dependencias no se instalaron.
+    import traceback
+
+    startup_error = traceback.format_exc()
+    listing = ["DIAGNOSTICO TEMPORAL DE ARRANQUE", "=" * 40, startup_error, ""]
+    try:
+        listing.append("python: " + sys.version)
+        listing.append("ROOT = " + ROOT)
+        listing.append("contenido de ROOT: " + ", ".join(sorted(os.listdir(ROOT))))
+        api_dir = os.path.dirname(os.path.abspath(__file__))
+        listing.append("contenido de api/: " + ", ".join(sorted(os.listdir(api_dir))))
+        listing.append("sys.path: " + " | ".join(sys.path))
+    except Exception as info_error:  # noqa: BLE001
+        listing.append(f"(no se pudo listar: {info_error})")
+
+    def app(environ, start_response):
+        body = "\n".join(listing).encode("utf-8")
+        start_response(
+            "500 INTERNAL SERVER ERROR",
+            [("Content-Type", "text/plain; charset=utf-8")],
+        )
+        return [body]
