@@ -83,9 +83,9 @@ class Product(db.Model):
     # Nombre del archivo de imagen dentro de static/img/products/
     image_filename = db.Column(db.String(120), nullable=True)
 
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now
     )
 
     # ----- Ayudas de presentación (etiquetas legibles) -----

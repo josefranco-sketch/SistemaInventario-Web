@@ -1247,3 +1247,121 @@ funciones con parámetros y return, diccionarios (etiquetas de
 movimiento), modularidad (orders_service reutiliza inventory_service) y
 librería estándar (datetime para la fecha de pago, sqlalchemy.text en la
 migración).
+
+# PR #15 – Sales Receipts & History (Sprint 5.4)
+
+## Información general
+
+**Fase**
+
+5 – Sistema de Ventas
+
+**Sprint**
+
+5.4 – Comprobante e Historial de Ventas
+
+**Branch**
+
+feature/sales-receipts
+
+**Estado**
+
+🔍 En revisión
+
+---
+
+## Objetivo
+
+Consultar ventas y generar comprobantes internos: historial de pedidos
+con filtros, comprobante imprimible (NO factura fiscal) y cancelación de
+pedidos sin romper historial. Cierra la Fase 5 – Sistema de Ventas.
+
+---
+
+## Trabajo realizado
+
+- Historial de pedidos de la tienda para todo el personal con filtros
+  simples: estado (los 4 visibles: Borrador / Pendiente de pago /
+  Pagado / Cancelado), vendedor, cliente (texto) y rango de fechas
+  (desde/hasta inclusivo). Columna de vendedor y acceso a comprobante
+  desde la lista.
+- Comprobante interno de venta imprimible, SOLO para pedidos pagados:
+  página independiente y minimalista (logo, código, cliente, vendedor,
+  quién cobró y cuándo, renglones con precios congelados, total) con
+  botón de imprimir y CSS @media print. Incluye de forma explícita la
+  leyenda "No es factura fiscal y no tiene valor tributario" (sin SAT,
+  sin pagos en línea — alcance del ADR respetado).
+- Cancelación de pedidos sin romper historial: solo borradores y
+  pendientes (un pagado ya descontó inventario y no se cancela), solo el
+  vendedor que lo creó o un administrador; el pedido y sus renglones se
+  conservan con estado Cancelado y el inventario no se toca. Botones en
+  el detalle (pendiente) y en el carrito (borrador), con confirmación.
+- Decisión de operación en mostrador: cualquier usuario interno puede
+  ver el detalle de un pedido y registrar el pago de un pendiente
+  (regla de negocio: marcar pagado no es exclusivo del admin); editar
+  un borrador sigue siendo solo de su vendedor, y cancelar solo del
+  dueño o admin.
+- Dashboard: el indicador de pedidos ahora es real ("Pedidos (7 días)",
+  vía count_recent_orders con datetime/timedelta); acceso rápido de
+  Ventas habilitado; solo cotizaciones sigue como demo (Fase 6).
+- BUG encontrado y corregido durante las pruebas: las fechas se
+  guardaban en UTC (datetime.utcnow) pero la tienda opera en Guatemala
+  (UTC-6), por lo que el filtro "pedidos de hoy" devolvía vacío y las
+  horas mostradas iban 6 horas adelantadas. Decisión registrada: el
+  sistema guarda hora local de la tienda (datetime.now) — apropiado
+  para un negocio de una sola zona horaria. Se normalizaron además las
+  fechas ya guardadas en la base local (-6h, ajuste único).
+
+---
+
+## Archivos principales
+
+- app/templates/sales/receipt.html (nuevo)
+- app/templates/sales/orders_list.html (reescrito con filtros)
+- app/templates/sales/{order_detail,order}.html (cancelar/comprobante)
+- app/templates/sales/base_sales.html ("Pedidos")
+- app/blueprints/sales/routes.py (historial, cancelar, comprobante)
+- app/services/orders_service.py (list_orders, cancel_order,
+  count_recent_orders)
+- app/services/dashboard_service.py, app/templates/admin/dashboard.html
+- app/models/{order,product,inventory}.py (hora local)
+- app/static/css/sales.css (comprobante + impresión)
+
+---
+
+## Pruebas realizadas
+
+- Filtros del historial contra BD real: estado, vendedor, cliente
+  (parcial e insensible a mayúsculas), fecha desde/hasta y combinados.
+- Comprobante de pagado: contenido completo (cliente, cobrador, fecha de
+  pago, renglones, total) y leyenda de no-factura; un pendiente redirige
+  con aviso (no tiene comprobante).
+- Cancelación: pendiente y borrador cancelan conservando renglones e
+  historial, inventario intacto; pagado y ya-cancelado rechazados;
+  regla de permisos verificada.
+- Dashboard con conteo real de pedidos (7 días).
+- Fechas: filtro "hoy" verificado tras la corrección de zona horaria.
+- Módulo público intacto; log sin errores.
+
+---
+
+## Pull Request
+
+**PR:** #15
+
+**Enlace**
+
+https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/sales-receipts?expand=1
+
+---
+
+## Observaciones
+
+Con este sprint la **Fase 5 – Sistema de Ventas queda completada**
+(panel/buscador, pedidos, pago con descuento único y comprobante/historial).
+
+Temas de la Sección 02 (rúbrica UFM): condicionales (reglas de
+cancelación y permisos), ciclos for (tablas e historial), listas y
+diccionarios, funciones con parámetros y return, modularidad, y librería
+estándar (datetime/timedelta en filtros de fecha y conteo de recientes —
+incluida la corrección de zona horaria).

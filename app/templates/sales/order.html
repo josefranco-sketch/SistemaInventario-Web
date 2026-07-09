@@ -151,6 +151,14 @@ modelo. Confirmar NO descuenta inventario (eso ocurre al pagar, 5.3).
                 inventario: el stock baja únicamente al registrar el pago.
               </p>
             </form>
+
+            <form method="post" action="{{ url_for('sales.order_cancel', order_id=order.id) }}" class="mt-2"
+                  onsubmit="return confirm('¿Cancelar este borrador? Se conservará en el historial como cancelado.');">
+              {{ csrf_form.csrf_token }}
+              <button type="submit" class="btn btn-link text-decoration-none text-danger w-100">
+                Cancelar pedido
+              </button>
+            </form>
           </div>
         </div>
       </div>

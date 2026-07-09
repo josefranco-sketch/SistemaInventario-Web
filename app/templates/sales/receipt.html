@@ -1,0 +1,102 @@
+<!--
+===============================================================================
+COMPROBANTE INTERNO DE VENTA
+
+Documento imprimible de un pedido PAGADO. Es un comprobante interno de
+la tienda: NO es factura fiscal y no tiene valor tributario (el sistema
+no maneja facturación ni SAT — fuera de alcance por decisión del ADR).
+
+Página independiente y minimalista pensada para imprimir (Ctrl/Cmd+P o
+el botón). Los elementos de navegación se ocultan al imprimir.
+===============================================================================
+-->
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comprobante {{ order.code }} | Los Altos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sales.css') }}">
+</head>
+<body class="receipt-body">
+
+  <div class="receipt-toolbar no-print">
+    <a class="receipt-back" href="{{ url_for('sales.order_detail', order_id=order.id) }}">← Volver al pedido</a>
+    <button type="button" class="receipt-print-btn" onclick="window.print()">Imprimir</button>
+  </div>
+
+  <main class="receipt">
+    <header class="receipt__header">
+      <img src="{{ url_for('static', filename='img/logo-los-altos.svg') }}"
+           alt="Los Altos" class="receipt__logo">
+      <p class="receipt__store">Los Altos — Cosméticos, Accesorios y Más</p>
+      <h1 class="receipt__title">Comprobante interno de venta</h1>
+      <p class="receipt__code">{{ order.code }}</p>
+    </header>
+
+    <section class="receipt__meta">
+      <div>
+        <span class="receipt__label">Cliente</span>
+        <span>{{ order.customer_name or "—" }}</span>
+      </div>
+      <div>
+        <span class="receipt__label">Teléfono</span>
+        <span>{{ order.customer_phone or "—" }}</span>
+      </div>
+      <div>
+        <span class="receipt__label">Vendedor</span>
+        <span>{{ order.seller.full_name }}</span>
+      </div>
+      <div>
+        <span class="receipt__label">Pagado el</span>
+        <span>{{ order.paid_at.strftime("%d/%m/%Y %H:%M") if order.paid_at else "—" }}</span>
+      </div>
+      <div>
+        <span class="receipt__label">Cobrado por</span>
+        <span>{{ order.paid_by.full_name if order.paid_by else "—" }}</span>
+      </div>
+    </section>
+
+    <table class="receipt__table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th class="receipt__num">Cant.</th>
+          <th class="receipt__num">Precio</th>
+          <th class="receipt__num">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items %}
+          <tr>
+            <td>
+              {{ item.product.name }}
+              <small>{{ item.product.code }} · {{ item.product.commercial_presentation }}</small>
+            </td>
+            <td class="receipt__num">{{ item.quantity }}</td>
+            <td class="receipt__num">Q {{ "%.2f"|format(item.unit_price) }}</td>
+            <td class="receipt__num">Q {{ "%.2f"|format(item.subtotal) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">Total</td>
+          <td class="receipt__num receipt__total">Q {{ "%.2f"|format(order.total) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <footer class="receipt__footer">
+      <p>
+        Documento interno de control de la tienda.
+        <strong>No es factura fiscal y no tiene valor tributario.</strong>
+      </p>
+      <p>Gracias por su compra.</p>
+    </footer>
+  </main>
+
+</body>
+</html>

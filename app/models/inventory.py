@@ -51,7 +51,7 @@ class Inventory(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=0)
 
     updated_at = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now
     )
 
     def __repr__(self):
@@ -82,7 +82,7 @@ class InventoryMovement(db.Model):
     # Motivo obligatorio (regla ADR: usuario, fecha y motivo siempre)
     reason = db.Column(db.String(200), nullable=False)
 
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     @property
     def movement_label(self):

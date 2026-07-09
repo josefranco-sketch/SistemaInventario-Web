@@ -8,13 +8,20 @@
 # entra). Las rutas solo manejan HTTP; la lógica vive en
 # app/services/ (sales_service y orders_service).
 # ==========================================================
+from datetime import datetime
+
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app.blueprints.auth.decorators import seller_required
 from app.blueprints.sales import sales_bp
 from app.blueprints.sales.forms import ConfirmOrderForm, CsrfOnlyForm
-from app.services import orders_service, products_service, sales_service
+from app.services import (
+    orders_service,
+    products_service,
+    sales_service,
+    users_service,
+)
 
 
 def _safe_next_url(next_url):
@@ -22,6 +29,16 @@ def _safe_next_url(next_url):
     if next_url and next_url.startswith("/") and not next_url.startswith("//"):
         return next_url
     return None
+
+
+def _parse_date(value):
+    """Convierte 'AAAA-MM-DD' (input type=date) a date, o None."""
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return None
 
 
 @sales_bp.route("/")
@@ -184,15 +201,43 @@ def order_confirm():
 
 
 # ----------------------------------------------------------
-# Pedidos del vendedor
+# Historial de pedidos (Sprint 5.4)
+#
+# Todo el personal (vendedores y administradores) consulta el
+# historial de la tienda: en mostrador, cualquier vendedor puede
+# atender el pago de un pedido creado por otro (regla de negocio:
+# marcar pagado no es exclusivo del admin).
 # ----------------------------------------------------------
 
 @sales_bp.route("/orders")
 @login_required
 @seller_required
 def orders_list():
-    orders = orders_service.list_orders_by_seller(current_user)
-    return render_template("sales/orders_list.html", orders=orders)
+    # Filtros simples: estado, vendedor, cliente y rango de fechas
+    status = request.args.get("status", "").strip()
+    seller_id = request.args.get("seller", type=int)
+    customer = request.args.get("customer", "").strip()
+    date_from = _parse_date(request.args.get("from", ""))
+    date_to = _parse_date(request.args.get("to", ""))
+
+    orders = orders_service.list_orders(
+        status=status,
+        seller_id=seller_id,
+        customer=customer,
+        date_from=date_from,
+        date_to=date_to,
+    )
+
+    return render_template(
+        "sales/orders_list.html",
+        orders=orders,
+        sellers=users_service.list_users(),
+        selected_status=status,
+        selected_seller=seller_id,
+        customer=customer,
+        date_from=request.args.get("from", ""),
+        date_to=request.args.get("to", ""),
+    )
 
 
 @sales_bp.route("/orders/<int:order_id>")
@@ -201,10 +246,7 @@ def orders_list():
 def order_detail(order_id):
     order = orders_service.get_order_or_none(order_id)
 
-    # Cada vendedor ve sus pedidos; el administrador puede ver todos
-    if order is None or (
-        order.seller_id != current_user.id and not current_user.is_admin()
-    ):
+    if order is None:
         flash("El pedido no existe.", "danger")
         return redirect(url_for("sales.orders_list"))
 
@@ -225,10 +267,7 @@ def order_detail(order_id):
 def order_pay(order_id):
     order = orders_service.get_order_or_none(order_id)
 
-    # El vendedor cobra sus pedidos; el administrador puede cobrar todos
-    if order is None or (
-        order.seller_id != current_user.id and not current_user.is_admin()
-    ):
+    if order is None:
         flash("El pedido no existe.", "danger")
         return redirect(url_for("sales.orders_list"))
 
@@ -241,3 +280,43 @@ def order_pay(order_id):
     flash(message, "success" if ok else "warning")
 
     return redirect(url_for("sales.order_detail", order_id=order.id))
+
+
+@sales_bp.route("/orders/<int:order_id>/cancel", methods=["POST"])
+@login_required
+@seller_required
+def order_cancel(order_id):
+    order = orders_service.get_order_or_none(order_id)
+
+    if order is None:
+        flash("El pedido no existe.", "danger")
+        return redirect(url_for("sales.orders_list"))
+
+    form = CsrfOnlyForm()
+    if not form.validate_on_submit():
+        flash("No se pudo cancelar el pedido.", "danger")
+        return redirect(url_for("sales.order_detail", order_id=order.id))
+
+    # La regla de quién puede cancelar vive en el servicio
+    ok, message = orders_service.cancel_order(order, current_user)
+    flash(message, "success" if ok else "warning")
+
+    return redirect(url_for("sales.orders_list"))
+
+
+@sales_bp.route("/orders/<int:order_id>/receipt")
+@login_required
+@seller_required
+def order_receipt(order_id):
+    order = orders_service.get_order_or_none(order_id)
+
+    if order is None:
+        flash("El pedido no existe.", "danger")
+        return redirect(url_for("sales.orders_list"))
+
+    # Solo un pedido pagado tiene comprobante de venta
+    if order.status != "pagado":
+        flash("Solo los pedidos pagados tienen comprobante.", "warning")
+        return redirect(url_for("sales.order_detail", order_id=order.id))
+
+    return render_template("sales/receipt.html", order=order)
