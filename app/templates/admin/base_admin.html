@@ -99,12 +99,11 @@ Proyecto: Sistema Integral de Gestión Comercial
             <small class="admin-sidebar__soon">F6</small>
           </span>
 
-          <span class="admin-sidebar__link admin-sidebar__link--disabled"
-                title="Disponible en la Fase 5">
+          <a class="admin-sidebar__link {% if request.endpoint and request.endpoint.startswith('sales.') %}active{% endif %}"
+             href="{{ url_for('sales.panel') }}">
             <i class="bi bi-cart"></i>
             <span>Ventas</span>
-            <small class="admin-sidebar__soon">F5</small>
-          </span>
+          </a>
 
         </nav>
 

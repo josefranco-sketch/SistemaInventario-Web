@@ -1,0 +1,105 @@
+/* ==============================================================
+   ESTILOS DEL ÁREA DE VENTAS
+
+   CSS por área según la convención del proyecto. Consume las
+   variables de :root (styles.css) y reutiliza los componentes
+   internos compartidos de admin.css (badges, tablas, filtros).
+   ============================================================== */
+
+.sales-body {
+    background-color: var(--la-bg);
+}
+
+/* --------------------------------------------------------------
+   Barra superior del vendedor (carbón, activo en rosa)
+   -------------------------------------------------------------- */
+
+.sales-navbar {
+    background-color: var(--la-sidebar-bg);
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+
+.sales-navbar__brand {
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.sales-navbar__toggler {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.sales-navbar__toggler .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+.sales-navbar__link {
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.85rem;
+}
+
+.sales-navbar__link:hover {
+    color: #ffffff;
+}
+
+/* Sección activa en rosa, igual que la sidebar admin */
+.sales-navbar__link.active {
+    color: #ffffff;
+    background-color: var(--la-sidebar-active);
+    font-weight: 600;
+}
+
+.sales-navbar__link--disabled {
+    color: rgba(255, 255, 255, 0.35);
+    cursor: default;
+}
+
+.sales-navbar__soon {
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 0.05rem 0.45rem;
+    margin-left: 0.25rem;
+}
+
+.sales-navbar__user {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------
+   Contenido
+   -------------------------------------------------------------- */
+
+.sales-content {
+    padding: 1.5rem 0 3rem;
+}
+
+.sales-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--la-carbon);
+    margin-bottom: 0.25rem;
+}
+
+.sales-empty-icon {
+    font-size: 2rem;
+    color: var(--la-text-muted);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.sales-product-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid var(--la-border);
+    flex-shrink: 0;
+}
