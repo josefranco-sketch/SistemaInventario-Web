@@ -2142,3 +2142,71 @@ automáticamente · publicado en Vercel · documentación completa
 (README, PR_tracker, PRESENTACION, CLAUDE.md).
 
 **Enlace:** https://github.com/josefranco-sketch/SistemaInventario-Web/compare/dev...feature/final-delivery?expand=1
+
+# PR #38 – Fix Public Quotation Persistence and Required Customer Fields
+
+**Fase:** Mantenimiento (post-cierre) · **Sprint:** Fix – Cotizaciones públicas persistentes
+**Branch:** feature/fix-quote-persistence · **Estado:** 🔍 En revisión
+
+## Contexto
+
+El formulario público de cotización solo exigía nombre; teléfono y
+departamento no eran obligatorios, no había campo de departamento en
+el modelo, la validación fallaba en silencio (sin mensaje al cliente)
+y la pantalla de confirmación descartaba los productos ya guardados en
+vez de mostrarlos. El código único (`COT-000N`) y la visibilidad en
+ventas/admin (vista compartida protegida por rol) ya funcionaban desde
+el Sprint 6.2 — no se tocaron.
+
+## Trabajo realizado
+
+- `Quote.customer_department` (nuevo campo, obligatorio) +
+  `QUOTE_DEPARTMENTS` con los 22 departamentos de Guatemala
+  (`app/models/quote.py`).
+- `quotes_service.validate_customer_data()`: valida nombre, teléfono
+  (mínimo 8 dígitos, acepta espacios/guiones) y departamento antes de
+  guardar (`app/services/quotes_service.py`).
+- Ruta pública (`app/blueprints/quotes/routes.py`): captura y valida
+  los 3 campos, usa `flash()` con mensajes claros por campo faltante,
+  y ya no guarda si falla la validación.
+- Confirmación pública rediseñada con **Post/Redirect/Get real**: los
+  datos de la cotización guardada viajan en sesión (`quote_confirmation`)
+  y se consumen una sola vez en el próximo GET — recargar la página no
+  reenvía ni duplica la cotización. Muestra código, nombre, teléfono,
+  departamento, productos y total.
+- Template público (`quotes/index.html`): nombre/teléfono/departamento
+  `required`, select de departamento con placeholder "Seleccione un
+  departamento" no válido como opción, bloque de confirmación separado
+  del formulario editable.
+- Listado y detalle de ventas (`sales/quotes_list.html`,
+  `sales/quote_detail.html`): agregado el departamento — ya eran
+  visibles para Admin y Ventas vía la vista compartida protegida por
+  `seller_required` (permite `admin` y `vendedor`); no se creó una
+  vista admin duplicada porque ya existía este mecanismo.
+- `migrate_quote_department.py`: script no destructivo (mismo patrón
+  que `migrate_payment_fields.py`) para agregar la columna a bases
+  SQLite ya existentes sin perder datos.
+
+## Decisión documentada
+
+El formato de código se mantuvo en `COT-0001` (4 dígitos), como ya
+estaba en producción/datos locales desde el Sprint 6.2, en vez de
+`COT-001` (3 dígitos) mencionado como ejemplo en el pedido — para no
+romper consistencia con las cotizaciones ya guardadas.
+
+## Pruebas realizadas
+
+- Envío sin nombre / sin teléfono / sin departamento / sin productos:
+  no se guarda, mensajes de error claros.
+- Teléfono con menos de 8 dígitos: rechazado.
+- Cotización válida: se guarda, código correlativo único, confirmación
+  con datos reales.
+- Recargar la página de confirmación: no reenvía ni duplica.
+- Cotización visible en `/sales/quotes` (vendedor y admin) y en el
+  detalle interno.
+- `verify_integration.py`: 9/9 (cotización sigue sin descontar
+  inventario, ciclo ventas→inventario intacto).
+- Base local (`instance/app.db`, 4 cotizaciones reales) migrada sin
+  pérdida de datos y restaurada al estado original tras las pruebas.
+
+**Enlace:** (pendiente — se agrega tras crear el Pull Request)

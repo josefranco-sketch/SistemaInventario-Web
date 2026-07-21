@@ -25,6 +25,33 @@ QUOTE_STATUS_LABELS = {
     QUOTE_CONVERTED: "Convertida en pedido",
 }
 
+# Departamentos de Guatemala, para el select obligatorio del
+# formulario público de cotización (evita departamentos inventados).
+QUOTE_DEPARTMENTS = [
+    "Alta Verapaz",
+    "Baja Verapaz",
+    "Chimaltenango",
+    "Chiquimula",
+    "El Progreso",
+    "Escuintla",
+    "Guatemala",
+    "Huehuetenango",
+    "Izabal",
+    "Jalapa",
+    "Jutiapa",
+    "Petén",
+    "Quetzaltenango",
+    "Quiché",
+    "Retalhuleu",
+    "Sacatepéquez",
+    "San Marcos",
+    "Santa Rosa",
+    "Sololá",
+    "Suchitepéquez",
+    "Totonicapán",
+    "Zacapa",
+]
+
 
 class Quote(db.Model):
     __tablename__ = "quotes"
@@ -37,6 +64,7 @@ class Quote(db.Model):
     # Datos que el cliente dejó al solicitar la cotización
     customer_name = db.Column(db.String(120), nullable=False)
     customer_phone = db.Column(db.String(30), nullable=False)
+    customer_department = db.Column(db.String(50), nullable=False, default="")
     customer_email = db.Column(db.String(120), nullable=True)
 
     status = db.Column(db.String(20), nullable=False, default=QUOTE_PENDING)

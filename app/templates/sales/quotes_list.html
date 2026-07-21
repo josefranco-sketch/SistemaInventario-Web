@@ -36,6 +36,7 @@ cotización nunca descuenta inventario.
               <th>Fecha</th>
               <th>Cliente</th>
               <th>Teléfono</th>
+              <th>Departamento</th>
               <th class="text-end">Productos</th>
               <th class="text-end">Total cotizado</th>
               <th>Estado</th>
@@ -49,6 +50,7 @@ cotización nunca descuenta inventario.
                 <td class="text-nowrap">{{ quote.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
                 <td>{{ quote.customer_name }}</td>
                 <td>{{ quote.customer_phone }}</td>
+                <td>{{ quote.customer_department or "—" }}</td>
                 <td class="text-end">{{ quote.items|length }}</td>
                 <td class="text-end fw-semibold">Q {{ "%.2f"|format(quote.total) }}</td>
                 <td>

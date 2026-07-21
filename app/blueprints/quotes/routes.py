@@ -1,7 +1,8 @@
 import re
 
-from flask import redirect, render_template, request, session, url_for
+from flask import flash, redirect, render_template, request, session, url_for
 
+from app.models.quote import QUOTE_DEPARTMENTS
 from app.services import quotes_service
 
 from . import quotes_bp
@@ -26,6 +27,7 @@ def _get_quote_state():
             "code": "COT-0001",
             "customer_name": "",
             "customer_phone": "",
+            "customer_department": "",
             "customer_email": "",
             "items": [],
             "subtotal": 0.0,
@@ -45,6 +47,16 @@ def _recalculate_quote(quote):
 @quotes_bp.route("/cotizaciones", methods=["GET", "POST"])
 def quote_home():
     quote = _get_quote_state()
+
+    # Confirmación de una cotización recién guardada (PRG: llega por
+    # GET tras el redirect del POST, y se consume una sola vez para
+    # que recargar la página no la vuelva a mostrar ni la reenvíe).
+    confirmation = session.pop("quote_confirmation", None)
+    if confirmation is not None:
+        return render_template(
+            "quotes/index.html", quote=quote, confirmation=confirmation
+        )
+
     remove_code = request.args.get("remove")
 
     if remove_code:
@@ -77,14 +89,22 @@ def quote_home():
     if request.method == "POST":
         quote["customer_name"] = request.form.get("customer_name", "").strip()
         quote["customer_phone"] = request.form.get("customer_phone", "").strip()
+        quote["customer_department"] = request.form.get("customer_department", "").strip()
         quote["customer_email"] = request.form.get("customer_email", "").strip()
 
         if not quote["items"]:
+            flash("Agrega al menos un producto a tu cotización antes de enviarla.", "danger")
             session["quote"] = quote
             session.modified = True
             return redirect(url_for("quotes.quote_home"))
 
-        if not quote["customer_name"] or not quote["customer_phone"]:
+        errors = quotes_service.validate_customer_data(
+            quote["customer_name"], quote["customer_phone"], quote["customer_department"]
+        )
+
+        if errors:
+            for error in errors:
+                flash(error, "danger")
             session["quote"] = quote
             session.modified = True
             return redirect(url_for("quotes.quote_home"))
@@ -95,30 +115,40 @@ def quote_home():
         saved_quote = quotes_service.create_quote_from_session(quote)
         session.pop("quote", None)
 
-        if saved_quote is not None:
-            success_message = (
-                f"✅ Su cotización {saved_quote.code} fue enviada "
-                "correctamente. Un vendedor se comunicará con usted."
+        if saved_quote is None:
+            flash(
+                "Los productos de tu cotización ya no están disponibles; "
+                "por favor arma una nueva desde el catálogo.",
+                "warning",
             )
-        else:
-            success_message = (
-                "Los productos de su cotización ya no están disponibles; "
-                "por favor arme una nueva desde el catálogo."
-            )
+            return redirect(url_for("quotes.quote_home"))
 
-        return render_template(
-            "quotes/index.html",
-            quote={
-                "code": saved_quote.code if saved_quote else "—",
-                "customer_name": "",
-                "customer_phone": "",
-                "customer_email": "",
-                "items": [],
-                "subtotal": 0.0,
-                "total": 0.0,
-                "success_message": success_message,
-            },
+        # Post/Redirect/Get: la confirmación viaja en sesión (se
+        # consume una sola vez en el próximo GET) para que recargar
+        # la página no reenvíe ni duplique la cotización.
+        session["quote_confirmation"] = {
+            "code": saved_quote.code,
+            "customer_name": saved_quote.customer_name,
+            "customer_phone": saved_quote.customer_phone,
+            "customer_department": saved_quote.customer_department,
+            "items": [
+                {
+                    "code": item.product.code,
+                    "name": item.product.name,
+                    "quantity": item.quantity,
+                    "price": float(item.unit_price),
+                    "subtotal": float(item.subtotal),
+                }
+                for item in saved_quote.items
+            ],
+            "total": float(saved_quote.total),
+        }
+        flash(
+            f"✅ Tu cotización {saved_quote.code} fue recibida correctamente. "
+            "Nos comunicaremos contigo.",
+            "success",
         )
+        return redirect(url_for("quotes.quote_home"))
 
     product_code = request.args.get("product_code", "").strip()
     product_name = request.args.get("product_name", "").strip()
@@ -153,4 +183,6 @@ def quote_home():
         session.modified = True
         return redirect(url_for("quotes.quote_home"))
 
-    return render_template("quotes/index.html", quote=quote)
+    return render_template(
+        "quotes/index.html", quote=quote, departments=QUOTE_DEPARTMENTS
+    )
