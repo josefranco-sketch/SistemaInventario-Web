@@ -87,6 +87,8 @@ hacia arriba (se avisa el detalle). Convertir NO descuenta inventario.
             <strong>{{ quote.customer_name }}</strong></p>
           <p class="mb-1"><span class="text-muted">Teléfono:</span>
             {{ quote.customer_phone }}</p>
+          <p class="mb-1"><span class="text-muted">Departamento:</span>
+            {{ quote.customer_department or "—" }}</p>
           <p class="mb-0"><span class="text-muted">Correo:</span>
             {{ quote.customer_email or "—" }}</p>
 

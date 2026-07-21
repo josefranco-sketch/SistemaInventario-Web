@@ -14,14 +14,71 @@
         </div>
     </div>
 
-    {# Confirmación al enviar la cotización (incluye su código de seguimiento) #}
-    {% if quote.success_message is defined and quote.success_message %}
-        <div class="alert alert-success" role="alert">
-            {{ quote.success_message }}
-        </div>
-    {% endif %}
+    {% if confirmation %}
+        {# Confirmación de una cotización ya guardada (llega por PRG: GET tras el POST) #}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4 class="mb-3">Resumen de tu cotización</h4>
 
-    <form method="post" action="{{ url_for('quotes.quote_home') }}">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Código</span>
+                        <strong>{{ confirmation['code'] }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Nombre</span>
+                        <strong>{{ confirmation['customer_name'] }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Teléfono</span>
+                        <strong>{{ confirmation['customer_phone'] }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Departamento</span>
+                        <strong>{{ confirmation['customer_department'] }}</strong>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in confirmation['items'] %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ item.name }}</div>
+                                    <small class="text-muted">{{ item.code }}</small>
+                                </td>
+                                <td>{{ item.quantity }}</td>
+                                <td class="text-end">Q {{ "%.2f"|format(item.price) }}</td>
+                                <td class="text-end">Q {{ "%.2f"|format(item.subtotal) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Total</th>
+                                <th class="text-end fs-5">Q {{ "%.2f"|format(confirmation['total']) }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <a href="{{ url_for('public.catalog') }}" class="btn btn-primary mt-3">
+                    Volver al catálogo
+                </a>
+            </div>
+        </div>
+    {% else %}
+
+    <form method="post" action="{{ url_for('quotes.quote_home') }}" novalidate>
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="card shadow-sm h-100">
@@ -30,7 +87,7 @@
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                               <label class="form-label fw-semibold">Nombre</label>
+                               <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
 
                                 <input
                                     type="text"
@@ -41,10 +98,29 @@
                                     required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Teléfono</label>
-                                <input type="text" name="customer_phone" class="form-control" value="{{ quote['customer_phone'] }}" placeholder="Teléfono del cliente">
+                                <label class="form-label fw-semibold">Teléfono <span class="text-danger">*</span></label>
+                                <input
+                                    type="tel"
+                                    name="customer_phone"
+                                    class="form-control"
+                                    value="{{ quote['customer_phone'] }}"
+                                    placeholder="Ej. 5511-2233"
+                                    required>
                             </div>
-                            <div class="col-12">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Departamento <span class="text-danger">*</span></label>
+                                <select name="customer_department" class="form-select" required>
+                                    <option value="" {% if not quote['customer_department'] %}selected{% endif %} disabled>
+                                        Seleccione un departamento
+                                    </option>
+                                    {% for department in departments %}
+                                        <option value="{{ department }}" {% if quote['customer_department'] == department %}selected{% endif %}>
+                                            {{ department }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Correo electrónico</label>
                                 <input type="email" name="customer_email" class="form-control" value="{{ quote['customer_email'] }}" placeholder="Correo del cliente">
                             </div>
@@ -156,6 +232,8 @@
             </div>
         </div>
     </form>
+
+    {% endif %}
 
 </div>
 {% endblock %}

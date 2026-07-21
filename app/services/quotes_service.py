@@ -12,11 +12,44 @@
 # inventario; convertirla tampoco (el descuento ocurre solo al
 # pagar el pedido, y ese código vive en orders_service).
 # ==========================================================
+import re
+
 from app.extensions import db
 from app.models.order import ORDER_PENDING, Order, OrderItem
 from app.models.product import STATUS_ACTIVE, Product
-from app.models.quote import QUOTE_CONVERTED, QUOTE_PENDING, Quote, QuoteItem
+from app.models.quote import (
+    QUOTE_CONVERTED,
+    QUOTE_DEPARTMENTS,
+    QUOTE_PENDING,
+    Quote,
+    QuoteItem,
+)
 from app.services import products_service
+
+MIN_PHONE_DIGITS = 8
+
+
+def validate_customer_data(customer_name, customer_phone, customer_department):
+    """Valida los datos obligatorios del cliente antes de guardar.
+
+    Regresa una lista de mensajes de error (vacía si todo es válido).
+    Se usa desde la ruta pública, antes de persistir la cotización.
+    """
+    errors = []
+
+    if not customer_name.strip():
+        errors.append("El nombre es obligatorio.")
+
+    digits = re.sub(r"\D", "", customer_phone)
+    if not customer_phone.strip():
+        errors.append("El teléfono es obligatorio.")
+    elif len(digits) < MIN_PHONE_DIGITS:
+        errors.append(f"El teléfono debe tener al menos {MIN_PHONE_DIGITS} dígitos.")
+
+    if customer_department not in QUOTE_DEPARTMENTS:
+        errors.append("Selecciona un departamento válido.")
+
+    return errors
 
 
 # ----------------------------------------------------------
@@ -67,6 +100,7 @@ def create_quote_from_session(quote_state):
         code="TMP",
         customer_name=quote_state.get("customer_name", "").strip(),
         customer_phone=quote_state.get("customer_phone", "").strip(),
+        customer_department=quote_state.get("customer_department", "").strip(),
         customer_email=quote_state.get("customer_email", "").strip() or None,
     )
     db.session.add(quote)
